@@ -11,6 +11,8 @@ import TeamsPage from "../pages/admin/TeamsPage";
 import PlayersPage from "../pages/admin/PlayersPage";
 import MatchesPage from "../pages/admin/MatchesPage";
 
+import MatchesPublicPage from "../pages/public/MatchesPublicPage";
+
 function AppRouter() {
   return (
     <BrowserRouter>
@@ -18,6 +20,7 @@ function AppRouter() {
         <Route path="/" element={<HomePage />} />
 
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/matches" element={<MatchesPublicPage />} />
 
         <Route
           path="/admin"
