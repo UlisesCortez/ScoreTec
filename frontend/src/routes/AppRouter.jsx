@@ -9,6 +9,7 @@ import RoleRoute from "./RoleRoute";
 import DisciplinesPage from "../pages/admin/DisciplinesPage";
 import TeamsPage from "../pages/admin/TeamsPage";
 import PlayersPage from "../pages/admin/PlayersPage";
+import MatchesPage from "../pages/admin/MatchesPage";
 
 function AppRouter() {
   return (
@@ -59,6 +60,15 @@ function AppRouter() {
           element={
             <RoleRoute allowedRoles={["ADMIN"]}>
               <PlayersPage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/admin/matches"
+          element={
+            <RoleRoute allowedRoles={["ADMIN"]}>
+              <MatchesPage />
             </RoleRoute>
           }
         />
