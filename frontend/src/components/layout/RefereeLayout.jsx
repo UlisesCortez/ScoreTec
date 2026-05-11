@@ -18,14 +18,16 @@ function RefereeLayout({ children }) {
 
   const linkClass = ({ isActive }) =>
     `block rounded-xl px-4 py-3 text-sm font-semibold transition ${
-      isActive ? "bg-[#8C1D2C] text-white" : "text-[#2B2D31] hover:bg-[#F4F4F5]"
+      isActive
+        ? "bg-[#8C1D2C] text-white"
+        : "text-[#4B4F56] hover:bg-[#F4F4F5] hover:text-[#8C1D2C]"
     }`;
 
   const SidebarContent = ({ mostrarLogo = true }) => (
-    <>
+    <div className="flex h-full flex-col">
       {mostrarLogo && (
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold">
+        <div className="mb-8">
+          <h1 className="text-2xl font-black tracking-tight text-[#2B2D31]">
             Score<span className="text-[#8C1D2C]">Tec</span>
           </h1>
           <p className="mt-1 text-sm text-[#6B6F76]">Panel de árbitro</p>
@@ -46,28 +48,36 @@ function RefereeLayout({ children }) {
         </NavLink>
       </nav>
 
-      <div className="mt-10 rounded-2xl border border-[#E6E7EA] bg-[#FAFAFA] p-4">
-        <p className="text-sm font-semibold">{user?.nombre}</p>
-        <p className="mt-1 break-all text-xs text-[#6B6F76]">{user?.email}</p>
-        <p className="mt-2 inline-block rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
-          {user?.rol}
-        </p>
-      </div>
+      <div className="mt-auto">
+        <div className="rounded-2xl border border-[#E6E7EA] bg-[#FAFAFA] p-4">
+          <p className="text-sm font-bold text-[#2B2D31]">
+            {user?.nombre || "Árbitro"}
+          </p>
 
-      <button
-        type="button"
-        onClick={cerrarSesion}
-        className="mt-6 w-full rounded-xl border border-[#8C1D2C] px-4 py-3 text-sm font-semibold text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:text-white"
-      >
-        Cerrar sesión
-      </button>
-    </>
+          <p className="mt-1 break-all text-xs text-[#6B6F76]">
+            {user?.email || "Sin correo"}
+          </p>
+
+          <p className="mt-3 inline-block rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-bold text-[#8C1D2C]">
+            {user?.rol || "ARBITRO"}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={cerrarSesion}
+          className="mt-4 w-full rounded-xl border border-[#8C1D2C] px-4 py-3 text-sm font-bold text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:text-white"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
   );
 
   return (
-    <main className="min-h-screen bg-[#FAFAFA] text-[#2B2D31]">
+    <main className="min-h-screen bg-[#F7F7F8] text-[#2B2D31]">
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 border-r border-[#E6E7EA] bg-white p-6 lg:block">
+        <aside className="sticky top-0 hidden h-screen w-72 border-r border-[#E6E7EA] bg-white p-6 lg:block">
           <SidebarContent />
         </aside>
 
@@ -78,16 +88,17 @@ function RefereeLayout({ children }) {
               onClick={cerrarMenu}
             />
 
-            <aside className="absolute left-0 top-0 flex h-screen w-[280px] flex-col bg-white p-5 shadow-2xl">
-              <div className="mb-8 flex items-center justify-between">
-                <h2 className="text-2xl font-bold">
+            <aside className="absolute left-0 top-0 flex h-screen w-[290px] max-w-[85vw] flex-col bg-white p-5 shadow-2xl">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-black text-[#2B2D31]">
                   Score<span className="text-[#8C1D2C]">Tec</span>
                 </h2>
 
                 <button
                   type="button"
                   onClick={cerrarMenu}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E6E7EA] text-lg font-semibold"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold text-[#2B2D31]"
+                  aria-label="Cerrar menú"
                 >
                   ×
                 </button>
@@ -98,32 +109,40 @@ function RefereeLayout({ children }) {
           </div>
         )}
 
-        <section className="flex-1">
-          <header className="border-b border-[#E6E7EA] bg-white px-6 py-4 lg:hidden">
-            <div className="flex items-center justify-between">
+        <section className="min-w-0 flex-1">
+          <header className="sticky top-0 z-30 border-b border-[#E6E7EA] bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+            <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setMenuAbierto(true)}
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#E6E7EA] text-2xl font-bold"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold"
+                aria-label="Abrir menú"
               >
                 ☰
               </button>
 
-              <h1 className="text-2xl font-bold">
-                Score<span className="text-[#8C1D2C]">Tec</span>
-              </h1>
+              <div className="text-center">
+                <h1 className="text-xl font-black leading-none">
+                  Score<span className="text-[#8C1D2C]">Tec</span>
+                </h1>
+                <p className="mt-1 text-[11px] font-semibold text-[#6B6F76]">
+                  Árbitro
+                </p>
+              </div>
 
               <button
                 type="button"
                 onClick={cerrarSesion}
-                className="rounded-xl bg-[#8C1D2C] px-4 py-2 text-sm font-semibold text-white"
+                className="rounded-xl bg-[#8C1D2C] px-3 py-2 text-xs font-bold text-white"
               >
                 Salir
               </button>
             </div>
           </header>
 
-          <div className="p-6 lg:p-10">{children}</div>
+          <div className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+            {children}
+          </div>
         </section>
       </div>
     </main>
