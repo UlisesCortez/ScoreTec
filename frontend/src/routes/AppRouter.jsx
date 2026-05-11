@@ -8,6 +8,7 @@ import RefereeDashboard from "../pages/referee/RefereeDashboard";
 import RoleRoute from "./RoleRoute";
 import DisciplinesPage from "../pages/admin/DisciplinesPage";
 import TeamsPage from "../pages/admin/TeamsPage";
+import PlayersPage from "../pages/admin/PlayersPage";
 
 function AppRouter() {
   return (
@@ -49,6 +50,15 @@ function AppRouter() {
           element={
             <RoleRoute allowedRoles={["ADMIN"]}>
               <TeamsPage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/admin/players"
+          element={
+            <RoleRoute allowedRoles={["ADMIN"]}>
+              <PlayersPage />
             </RoleRoute>
           }
         />
