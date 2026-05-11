@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  ARBITRO
+}
+
+enum MatchStatus {
+  PROXIMO
+  EN_CURSO
+  FINALIZADO
+  CANCELADO
+}
+
+enum EventType {
+  GOL
+  PUNTO
+  ENCESTA
+  FALTA
+  TARJETA_AMARILLA
+  TARJETA_ROJA
+  TIEMPO_FUERA
+  ASISTENCIA
+  OTRO
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  nombre       String
+  email        String   @unique
+  passwordHash String
+  rol          Role
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  partidosArbitrados Match[] @relation("ArbitroPartidos")
+}
+
+model Discipline {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  equipos  Team[]
+  partidos Match[]
+}
+
+model Team {
+  id           Int      @id @default(autoincrement())
+  nombre       String
+  escudoUrl    String?
+  entrenador   String?
+  disciplinaId Int
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  disciplina Discipline @relation(fields: [disciplinaId], references: [id])
+  jugadores  Player[]
+
+  partidosLocal     Match[] @relation("EquipoLocal")
+  partidosVisitante Match[] @relation("EquipoVisitante")
+  eventos           Event[]
+}
+
+model Player {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  numero    Int?
+  posicion  String?
+  fotoUrl   String?
+  equipoId  Int
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  equipo  Team    @relation(fields: [equipoId], references: [id])
+  eventos Event[]
+}
+
+model Match {
+  id                     Int         @id @default(autoincrement())
+  disciplinaId            Int
+  equipoLocalId           Int
+  equipoVisitanteId       Int
+  arbitroId               Int?
+  fecha                   DateTime
+  ubicacionNombre         String?
+  ubicacionDireccion      String?
+  ubicacionMapaUrl        String?
+  estado                  MatchStatus @default(PROXIMO)
+  marcadorLocal           Int         @default(0)
+  marcadorVisitante       Int         @default(0)
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+
+  disciplina      Discipline @relation(fields: [disciplinaId], references: [id])
+  equipoLocal     Team       @relation("EquipoLocal", fields: [equipoLocalId], references: [id])
+  equipoVisitante Team       @relation("EquipoVisitante", fields: [equipoVisitanteId], references: [id])
+  arbitro         User?      @relation("ArbitroPartidos", fields: [arbitroId], references: [id])
+
+  eventos Event[]
+}
+
+model Event {
+  id          Int       @id @default(autoincrement())
+  partidoId   Int
+  equipoId    Int
+  jugadorId   Int?
+  tipo        EventType
+  minuto      Int?
+  descripcion String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  partido Match   @relation(fields: [partidoId], references: [id])
+  equipo  Team    @relation(fields: [equipoId], references: [id])
+  jugador Player? @relation(fields: [jugadorId], references: [id])
+}
