@@ -10,9 +10,11 @@ import DisciplinesPage from "../pages/admin/DisciplinesPage";
 import TeamsPage from "../pages/admin/TeamsPage";
 import PlayersPage from "../pages/admin/PlayersPage";
 import MatchesPage from "../pages/admin/MatchesPage";
-import MatchDetailPage from "../pages/public/MatchDetailPage";
 
+import MatchDetailPage from "../pages/public/MatchDetailPage";
+import StatsPage from "../pages/public/StatsPage";
 import MatchesPublicPage from "../pages/public/MatchesPublicPage";
+import TeamsPublicPage from "../pages/public/TeamsPublicPage";
 
 function AppRouter() {
   return (
@@ -23,6 +25,8 @@ function AppRouter() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/matches" element={<MatchesPublicPage />} />
         <Route path="/matches/:id" element={<MatchDetailPage />} />
+        <Route path="/stats" element={<StatsPage />} />
+        <Route path="/teams" element={<TeamsPublicPage />} />
 
         <Route
           path="/admin"

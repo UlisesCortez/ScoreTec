@@ -12,7 +12,7 @@ function HomePage() {
       <section className="mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl items-center gap-10 px-6 py-12 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-[#8C1D2C]">
-            TecNM Campus Nogales
+            Campus TecNM Nogales
           </p>
 
           <h1 className="mt-4 text-5xl font-bold leading-tight">
