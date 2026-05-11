@@ -10,11 +10,13 @@ import {
 
 import { getDisciplinesRequest } from "../../api/disciplinesApi";
 import { getTeamsRequest } from "../../api/teamsApi";
+import { getUsersRequest } from "../../api/usersApi";
 
 function MatchesPage() {
   const [partidos, setPartidos] = useState([]);
   const [disciplinas, setDisciplinas] = useState([]);
   const [equipos, setEquipos] = useState([]);
+  const [arbitros, setArbitros] = useState([]);
 
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -26,25 +28,32 @@ function MatchesPage() {
     disciplinaId: "",
     equipoLocalId: "",
     equipoVisitanteId: "",
+    arbitroId: "",
     fecha: "",
     ubicacionNombre: "",
     ubicacionDireccion: "",
     ubicacionMapaUrl: "",
   });
-
   const cargarDatos = async () => {
     try {
       setCargando(true);
 
-      const [partidosData, disciplinasData, equiposData] = await Promise.all([
-        getMatchesRequest(),
-        getDisciplinesRequest(),
-        getTeamsRequest(),
-      ]);
+      const [partidosData, disciplinasData, equiposData, usuariosData] =
+        await Promise.all([
+          getMatchesRequest(),
+          getDisciplinesRequest(),
+          getTeamsRequest(),
+          getUsersRequest(),
+        ]);
 
       setPartidos(partidosData);
       setDisciplinas(disciplinasData.filter((disciplina) => disciplina.activo));
       setEquipos(equiposData.filter((equipo) => equipo.activo));
+      setArbitros(
+        usuariosData.filter(
+          (usuario) => usuario.activo && usuario.rol === "ARBITRO",
+        ),
+      );
     } catch (error) {
       setError("No se pudieron cargar los datos.");
     } finally {
@@ -69,6 +78,7 @@ function MatchesPage() {
       disciplinaId: "",
       equipoLocalId: "",
       equipoVisitanteId: "",
+      arbitroId: "",
       fecha: "",
       ubicacionNombre: "",
       ubicacionDireccion: "",
@@ -122,6 +132,7 @@ function MatchesPage() {
         disciplinaId: Number(form.disciplinaId),
         equipoLocalId: Number(form.equipoLocalId),
         equipoVisitanteId: Number(form.equipoVisitanteId),
+        arbitroId: form.arbitroId ? Number(form.arbitroId) : null,
         fecha: new Date(form.fecha).toISOString(),
         ubicacionNombre: form.ubicacionNombre || null,
         ubicacionDireccion: form.ubicacionDireccion || null,
@@ -152,6 +163,7 @@ function MatchesPage() {
       disciplinaId: String(partido.disciplinaId),
       equipoLocalId: String(partido.equipoLocalId),
       equipoVisitanteId: String(partido.equipoVisitanteId),
+      arbitroId: partido.arbitroId ? String(partido.arbitroId) : "",
       fecha: partido.fecha ? partido.fecha.slice(0, 16) : "",
       ubicacionNombre: partido.ubicacionNombre || "",
       ubicacionDireccion: partido.ubicacionDireccion || "",
@@ -271,7 +283,26 @@ function MatchesPage() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Árbitro / Anotador
+              </label>
 
+              <select
+                name="arbitroId"
+                value={form.arbitroId}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-[#E6E7EA] bg-white px-4 py-3 outline-none focus:border-[#8C1D2C]"
+              >
+                <option value="">Sin árbitro asignado</option>
+
+                {arbitros.map((arbitro) => (
+                  <option key={arbitro.id} value={arbitro.id}>
+                    {arbitro.nombre} — {arbitro.email}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="mb-2 block text-sm font-medium">
                 Fecha y hora
@@ -372,6 +403,7 @@ function MatchesPage() {
                   <tr className="border-b border-[#E6E7EA] text-[#6B6F76]">
                     <th className="px-3 py-3 font-semibold">Partido</th>
                     <th className="px-3 py-3 font-semibold">Disciplina</th>
+                    <th className="px-3 py-3 font-semibold">Árbitro</th>
                     <th className="px-3 py-3 font-semibold">Fecha</th>
                     <th className="px-3 py-3 font-semibold">Marcador</th>
                     <th className="px-3 py-3 font-semibold">Estado</th>
@@ -395,6 +427,9 @@ function MatchesPage() {
 
                       <td className="px-3 py-4 text-[#6B6F76]">
                         {formatearFecha(partido.fecha)}
+                      </td>
+                      <td className="px-3 py-4 text-[#6B6F76]">
+                        {partido.arbitro?.nombre || "Sin asignar"}
                       </td>
 
                       <td className="px-3 py-4 font-semibold">

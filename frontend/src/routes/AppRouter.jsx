@@ -17,6 +17,8 @@ import StatsPage from "../pages/public/StatsPage";
 import MatchesPublicPage from "../pages/public/MatchesPublicPage";
 import TeamsPublicPage from "../pages/public/TeamsPublicPage";
 
+import RefereeMatchPage from "../pages/referee/RefereeMatchPage";
+
 function AppRouter() {
   return (
     <BrowserRouter>
@@ -88,6 +90,15 @@ function AppRouter() {
           element={
             <RoleRoute allowedRoles={["ADMIN"]}>
               <UsersPage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/referee/matches/:id"
+          element={
+            <RoleRoute allowedRoles={["ARBITRO"]}>
+              <RefereeMatchPage />
             </RoleRoute>
           }
         />

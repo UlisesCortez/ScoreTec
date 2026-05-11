@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { getMatchesRequest } from "../../api/matchesApi";
+import RefereeLayout from "../../components/layout/RefereeLayout";
 
 function RefereeDashboard() {
   const navigate = useNavigate();
@@ -65,133 +66,116 @@ function RefereeDashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FAFAFA] text-[#2B2D31]">
-      <header className="border-b border-[#E6E7EA] bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-2xl font-bold">
-              Score<span className="text-[#8C1D2C]">Tec</span>
-            </h1>
-            <p className="mt-1 text-sm text-[#6B6F76]">Panel de árbitro</p>
-          </div>
+    <RefereeLayout>
+      <div className="mb-8">
+        <p className="text-sm font-semibold uppercase tracking-wide text-[#8C1D2C]">
+          Partidos asignados
+        </p>
 
-          <button
-            onClick={cerrarSesion}
-            className="rounded-xl bg-[#8C1D2C] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            Salir
-          </button>
-        </div>
-      </header>
+        <h2 className="mt-2 text-4xl font-bold">Bienvenido, {user?.nombre}</h2>
 
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#8C1D2C]">
-            Partidos asignados
-          </p>
+        <p className="mt-3 max-w-2xl text-[#6B6F76]">
+          Desde aquí puedes iniciar partidos, registrar eventos y finalizar
+          encuentros que tengas asignados.
+        </p>
+      </div>
 
-          <h2 className="mt-2 text-4xl font-bold">
-            Bienvenido, {user?.nombre}
-          </h2>
-
-          <p className="mt-3 max-w-2xl text-[#6B6F76]">
-            Desde aquí puedes iniciar partidos, registrar eventos y finalizar
-            encuentros que tengas asignados.
-          </p>
+      <div className="mb-8 grid gap-5 md:grid-cols-3">
+        <div className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
+          <p className="text-sm text-[#6B6F76]">Próximos</p>
+          <h3 className="mt-2 text-3xl font-bold">{resumen.proximos}</h3>
         </div>
 
-        <div className="mb-8 grid gap-5 md:grid-cols-3">
-          <div className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
-            <p className="text-sm text-[#6B6F76]">Próximos</p>
-            <h3 className="mt-2 text-3xl font-bold">{resumen.proximos}</h3>
-          </div>
-
-          <div className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
-            <p className="text-sm text-[#6B6F76]">En curso</p>
-            <h3 className="mt-2 text-3xl font-bold">{resumen.enCurso}</h3>
-          </div>
-
-          <div className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
-            <p className="text-sm text-[#6B6F76]">Finalizados</p>
-            <h3 className="mt-2 text-3xl font-bold">{resumen.finalizados}</h3>
-          </div>
+        <div className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
+          <p className="text-sm text-[#6B6F76]">En curso</p>
+          <h3 className="mt-2 text-3xl font-bold">{resumen.enCurso}</h3>
         </div>
 
-        {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+        <div className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
+          <p className="text-sm text-[#6B6F76]">Finalizados</p>
+          <h3 className="mt-2 text-3xl font-bold">{resumen.finalizados}</h3>
+        </div>
+      </div>
 
-        <section className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <h3 className="text-xl font-semibold">Mis partidos</h3>
+      {error && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
-            <span className="rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
-              {partidos.length} asignados
-            </span>
-          </div>
+      <section className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="text-xl font-semibold">Mis partidos</h3>
 
-          {cargando ? (
-            <p className="text-sm text-[#6B6F76]">Cargando partidos...</p>
-          ) : partidos.length === 0 ? (
+          <span className="rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
+            {partidos.length} asignados
+          </span>
+        </div>
+
+        {cargando ? (
+          <p className="text-sm text-[#6B6F76]">Cargando partidos...</p>
+        ) : partidos.length === 0 ? (
+          <div className="rounded-2xl bg-[#FAFAFA] p-5">
             <p className="text-sm text-[#6B6F76]">
               No tienes partidos asignados todavía.
             </p>
-          ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {partidos.map((partido) => (
-                <article
-                  key={partido.id}
-                  className="rounded-2xl border border-[#E6E7EA] bg-[#FAFAFA] p-5"
-                >
-                  <div className="mb-4 flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-[#8C1D2C]">
-                        {partido.disciplina?.nombre}
-                      </p>
+            <p className="mt-2 text-xs text-[#9CA3AF]">
+              Un administrador debe asignarte como árbitro/anotador en un
+              partido.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {partidos.map((partido) => (
+              <article
+                key={partido.id}
+                className="rounded-2xl border border-[#E6E7EA] bg-[#FAFAFA] p-5"
+              >
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[#8C1D2C]">
+                      {partido.disciplina?.nombre}
+                    </p>
 
-                      <h4 className="mt-2 text-lg font-bold">
-                        {partido.equipoLocal?.nombre} vs{" "}
-                        {partido.equipoVisitante?.nombre}
-                      </h4>
+                    <h4 className="mt-2 text-lg font-bold">
+                      {partido.equipoLocal?.nombre} vs{" "}
+                      {partido.equipoVisitante?.nombre}
+                    </h4>
 
-                      <p className="mt-1 text-sm text-[#6B6F76]">
-                        {formatearFecha(partido.fecha)}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        estadoClase[partido.estado] ||
-                        "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {partido.estado}
-                    </span>
-                  </div>
-
-                  <div className="mb-4 rounded-2xl bg-white px-4 py-3 text-center">
-                    <p className="text-2xl font-bold">
-                      {partido.marcadorLocal}
-                      <span className="mx-3 text-[#CDAA43]">-</span>
-                      {partido.marcadorVisitante}
+                    <p className="mt-1 text-sm text-[#6B6F76]">
+                      {formatearFecha(partido.fecha)}
                     </p>
                   </div>
 
-                  <Link
-                    to={`/referee/matches/${partido.id}`}
-                    className="inline-block rounded-xl bg-[#8C1D2C] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      estadoClase[partido.estado] || "bg-gray-100 text-gray-600"
+                    }`}
                   >
-                    Gestionar partido
-                  </Link>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+                    {partido.estado}
+                  </span>
+                </div>
+
+                <div className="mb-4 rounded-2xl bg-white px-4 py-3 text-center">
+                  <p className="text-2xl font-bold">
+                    {partido.marcadorLocal}
+                    <span className="mx-3 text-[#CDAA43]">-</span>
+                    {partido.marcadorVisitante}
+                  </p>
+                </div>
+
+                <Link
+                  to={`/referee/matches/${partido.id}`}
+                  className="inline-block rounded-xl bg-[#8C1D2C] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                >
+                  Gestionar partido
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
-    </main>
+    </RefereeLayout>
   );
 }
 
