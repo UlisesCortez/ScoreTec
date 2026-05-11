@@ -10,6 +10,7 @@ import DisciplinesPage from "../pages/admin/DisciplinesPage";
 import TeamsPage from "../pages/admin/TeamsPage";
 import PlayersPage from "../pages/admin/PlayersPage";
 import MatchesPage from "../pages/admin/MatchesPage";
+import MatchDetailPage from "../pages/public/MatchDetailPage";
 
 import MatchesPublicPage from "../pages/public/MatchesPublicPage";
 
@@ -21,6 +22,7 @@ function AppRouter() {
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/matches" element={<MatchesPublicPage />} />
+        <Route path="/matches/:id" element={<MatchDetailPage />} />
 
         <Route
           path="/admin"

@@ -92,20 +92,24 @@ function HomePage() {
             </div>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-[#E6E7EA] p-4">
-              <p className="text-sm text-[#6B6F76]">Disciplina</p>
-              <p className="mt-1 font-semibold">Fútbol</p>
-            </div>
+          <div className="mt-4 rounded-2xl border border-[#E6E7EA] bg-white px-4 py-3">
+            <div className="grid gap-3 text-sm sm:grid-cols-3">
+              <div>
+                <p className="text-xs text-[#6B6F76]">Disciplina</p>
+                <p className="mt-0.5 font-semibold text-[#2B2D31]">Fútbol</p>
+              </div>
 
-            <div className="rounded-2xl border border-[#E6E7EA] p-4">
-              <p className="text-sm text-[#6B6F76]">Estado</p>
-              <p className="mt-1 font-semibold">En curso</p>
-            </div>
+              <div>
+                <p className="text-xs text-[#6B6F76]">Estado</p>
+                <p className="mt-0.5 font-semibold text-[#2B2D31]">En curso</p>
+              </div>
 
-            <div className="rounded-2xl border border-[#E6E7EA] p-4">
-              <p className="text-sm text-[#6B6F76]">Sede</p>
-              <p className="mt-1 font-semibold">Cancha principal</p>
+              <div>
+                <p className="text-xs text-[#6B6F76]">Sede</p>
+                <p className="mt-0.5 font-semibold text-[#2B2D31]">
+                  Directora de Cancha
+                </p>
+              </div>
             </div>
           </div>
         </div>
