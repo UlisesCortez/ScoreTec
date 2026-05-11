@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   ADMIN
   ARBITRO
+  USUARIO
 }
 
 enum MatchStatus {
@@ -35,7 +36,7 @@ model User {
   id           Int      @id @default(autoincrement())
   nombre       String
   email        String   @unique
-  passwordHash String
+  passwordHash String?
   rol          Role
   activo       Boolean  @default(true)
   createdAt    DateTime @default(now())

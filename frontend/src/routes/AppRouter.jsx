@@ -1,0 +1,60 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import HomePage from "../pages/public/HomePage";
+import LoginPage from "../pages/auth/LoginPage";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import RefereeDashboard from "../pages/referee/RefereeDashboard";
+
+import RoleRoute from "./RoleRoute";
+import DisciplinesPage from "../pages/admin/DisciplinesPage";
+import TeamsPage from "../pages/admin/TeamsPage";
+
+function AppRouter() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/admin"
+          element={
+            <RoleRoute allowedRoles={["ADMIN"]}>
+              <AdminDashboard />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/referee"
+          element={
+            <RoleRoute allowedRoles={["ARBITRO"]}>
+              <RefereeDashboard />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/admin/disciplines"
+          element={
+            <RoleRoute allowedRoles={["ADMIN"]}>
+              <DisciplinesPage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/admin/teams"
+          element={
+            <RoleRoute allowedRoles={["ADMIN"]}>
+              <TeamsPage />
+            </RoleRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default AppRouter;
