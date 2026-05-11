@@ -10,6 +10,7 @@ import DisciplinesPage from "../pages/admin/DisciplinesPage";
 import TeamsPage from "../pages/admin/TeamsPage";
 import PlayersPage from "../pages/admin/PlayersPage";
 import MatchesPage from "../pages/admin/MatchesPage";
+import UsersPage from "../pages/admin/UsersPage";
 
 import MatchDetailPage from "../pages/public/MatchDetailPage";
 import StatsPage from "../pages/public/StatsPage";
@@ -78,6 +79,15 @@ function AppRouter() {
           element={
             <RoleRoute allowedRoles={["ADMIN"]}>
               <MatchesPage />
+            </RoleRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <RoleRoute allowedRoles={["ADMIN"]}>
+              <UsersPage />
             </RoleRoute>
           }
         />

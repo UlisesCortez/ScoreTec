@@ -9,6 +9,7 @@ const playerRoutes = require("./routes/players.routes");
 const matchRoutes = require("./routes/matches.routes");
 const eventRoutes = require("./routes/events.routes");
 const statsRoutes = require("./routes/stats.routes");
+const userRoutes = require("./routes/users.routes");
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use("/api/players", playerRoutes);
 app.use("/api/matches", matchRoutes);
 app.use("/api", eventRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/users", userRoutes);
 
 module.exports = app;
