@@ -16,6 +16,9 @@ import MatchDetailPage from "../pages/public/MatchDetailPage";
 import StatsPage from "../pages/public/StatsPage";
 import MatchesPublicPage from "../pages/public/MatchesPublicPage";
 import TeamsPublicPage from "../pages/public/TeamsPublicPage";
+import CalendarPage from "../pages/public/CalendarPage";
+import TeamDetailPage from "../pages/public/TeamDetailPage";
+import PlayerDetailPage from "../pages/public/PlayerDetailPge";
 
 import RefereeMatchPage from "../pages/referee/RefereeMatchPage";
 
@@ -30,6 +33,9 @@ function AppRouter() {
         <Route path="/matches/:id" element={<MatchDetailPage />} />
         <Route path="/stats" element={<StatsPage />} />
         <Route path="/teams" element={<TeamsPublicPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/teams/:id" element={<TeamDetailPage />} />
+        <Route path="/players/:id" element={<PlayerDetailPage />} />
 
         <Route
           path="/admin"

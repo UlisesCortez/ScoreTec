@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import PublicNavbar from "../../components/layout/PublicNavBar";
+import PublicNavbar from "../../components/layout/PublicNavbar";
 
 import { getMatchesRequest } from "../../api/matchesApi";
 import { getTeamsRequest } from "../../api/teamsApi";
@@ -9,6 +9,7 @@ import { getEventsByMatchRequest } from "../../api/eventsApi";
 
 function StatsPage() {
   const [tab, setTab] = useState("equipos");
+  const [tablaEquipos, setTablaEquipos] = useState("vivo");
 
   const [partidos, setPartidos] = useState([]);
   const [equipos, setEquipos] = useState([]);
@@ -69,7 +70,7 @@ function StatsPage() {
     return () => clearInterval(intervalo);
   }, []);
 
-  const estadisticasEquipos = useMemo(() => {
+  const calcularEstadisticasEquipos = (modo) => {
     const mapa = new Map();
 
     equipos.forEach((equipo) => {
@@ -77,63 +78,81 @@ function StatsPage() {
         id: equipo.id,
         nombre: equipo.nombre,
         disciplina: equipo.disciplina?.nombre || "Sin disciplina",
+
         pj: 0,
         g: 0,
         e: 0,
         p: 0,
-        gf: 0,
-        gc: 0,
+
+        favor: 0,
+        contra: 0,
         dif: 0,
-        pts: 0,
       });
     });
 
-    partidos
-      .filter((partido) => partido.estado === "FINALIZADO")
-      .forEach((partido) => {
-        const local = mapa.get(partido.equipoLocalId);
-        const visitante = mapa.get(partido.equipoVisitanteId);
+    const partidosValidos = partidos.filter((partido) => {
+      if (modo === "oficial") {
+        return partido.estado === "FINALIZADO";
+      }
 
-        if (!local || !visitante) return;
+      return partido.estado === "FINALIZADO" || partido.estado === "EN_CURSO";
+    });
 
-        const marcadorLocal = partido.marcadorLocal ?? 0;
-        const marcadorVisitante = partido.marcadorVisitante ?? 0;
+    partidosValidos.forEach((partido) => {
+      const local = mapa.get(partido.equipoLocalId);
+      const visitante = mapa.get(partido.equipoVisitanteId);
 
-        local.pj += 1;
-        visitante.pj += 1;
+      if (!local || !visitante) return;
 
-        local.gf += marcadorLocal;
-        local.gc += marcadorVisitante;
+      const marcadorLocal = partido.marcadorLocal ?? 0;
+      const marcadorVisitante = partido.marcadorVisitante ?? 0;
 
-        visitante.gf += marcadorVisitante;
-        visitante.gc += marcadorLocal;
+      local.pj += 1;
+      visitante.pj += 1;
 
-        if (marcadorLocal > marcadorVisitante) {
-          local.g += 1;
-          local.pts += 3;
-          visitante.p += 1;
-        } else if (marcadorLocal < marcadorVisitante) {
-          visitante.g += 1;
-          visitante.pts += 3;
-          local.p += 1;
-        } else {
-          local.e += 1;
-          visitante.e += 1;
-          local.pts += 1;
-          visitante.pts += 1;
-        }
+      local.favor += marcadorLocal;
+      local.contra += marcadorVisitante;
 
-        local.dif = local.gf - local.gc;
-        visitante.dif = visitante.gf - visitante.gc;
-      });
+      visitante.favor += marcadorVisitante;
+      visitante.contra += marcadorLocal;
+
+      if (marcadorLocal > marcadorVisitante) {
+        local.g += 1;
+        visitante.p += 1;
+      } else if (marcadorLocal < marcadorVisitante) {
+        visitante.g += 1;
+        local.p += 1;
+      } else {
+        local.e += 1;
+        visitante.e += 1;
+      }
+
+      local.dif = local.favor - local.contra;
+      visitante.dif = visitante.favor - visitante.contra;
+    });
 
     return Array.from(mapa.values()).sort((a, b) => {
-      if (b.pts !== a.pts) return b.pts - a.pts;
+      if (b.g !== a.g) return b.g - a.g;
       if (b.dif !== a.dif) return b.dif - a.dif;
-      if (b.gf !== a.gf) return b.gf - a.gf;
+      if (b.favor !== a.favor) return b.favor - a.favor;
+      if (a.contra !== b.contra) return a.contra - b.contra;
+
       return a.nombre.localeCompare(b.nombre);
     });
+  };
+
+  const estadisticasEquiposEnVivo = useMemo(() => {
+    return calcularEstadisticasEquipos("vivo");
   }, [equipos, partidos]);
+
+  const estadisticasEquiposOficial = useMemo(() => {
+    return calcularEstadisticasEquipos("oficial");
+  }, [equipos, partidos]);
+
+  const estadisticasEquipos =
+    tablaEquipos === "vivo"
+      ? estadisticasEquiposEnVivo
+      : estadisticasEquiposOficial;
 
   const estadisticasJugadores = useMemo(() => {
     const mapa = new Map();
@@ -185,6 +204,7 @@ function StatsPage() {
       if (b.goles !== a.goles) return b.goles - a.goles;
       if (b.puntos !== a.puntos) return b.puntos - a.puntos;
       if (b.eventos !== a.eventos) return b.eventos - a.eventos;
+
       return a.nombre.localeCompare(b.nombre);
     });
   }, [jugadores, eventos]);
@@ -208,6 +228,88 @@ function StatsPage() {
         ? "border-[#8C1D2C] text-[#8C1D2C]"
         : "border-transparent text-[#6B6F76] hover:text-[#8C1D2C]"
     }`;
+
+  const tablaClass = (value) =>
+    `rounded-xl px-3 py-2 text-xs font-semibold transition ${
+      tablaEquipos === value
+        ? "bg-[#8C1D2C] !text-white"
+        : "bg-white text-[#4B4F56] hover:bg-[#F4F4F5] hover:text-[#8C1D2C]"
+    }`;
+
+  const TablaEquipos = ({ datos }) => (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[700px] border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-[#E6E7EA] bg-[#FAFAFA] text-left text-xs text-[#6B6F76]">
+            <th className="w-12 px-4 py-3 font-semibold">#</th>
+
+            <th className="px-3 py-3 font-semibold">Equipo</th>
+
+            <th className="px-3 py-3 font-semibold">Disciplina</th>
+
+            <th className="px-3 py-3 text-center font-semibold">PJ</th>
+
+            <th className="px-3 py-3 text-center font-semibold">G</th>
+
+            <th className="px-3 py-3 text-center font-semibold">E</th>
+
+            <th className="px-3 py-3 text-center font-semibold">P</th>
+
+            <th className="px-3 py-3 text-center font-semibold">Favor</th>
+
+            <th className="px-3 py-3 text-center font-semibold">Contra</th>
+
+            <th className="px-4 py-3 text-center font-semibold">DIF</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {datos.map((equipo, index) => (
+            <tr
+              key={equipo.id}
+              className="border-b border-[#F0F0F1] last:border-b-0 hover:bg-[#FAFAFA]"
+            >
+              <td className="px-4 py-3 text-[#6B6F76]">{index + 1}</td>
+
+              <td className="px-3 py-3">
+                <p className="font-semibold text-[#2B2D31]">{equipo.nombre}</p>
+              </td>
+
+              <td className="px-3 py-3 text-[#6B6F76]">{equipo.disciplina}</td>
+
+              <td className="px-3 py-3 text-center">{equipo.pj}</td>
+
+              <td className="px-3 py-3 text-center font-semibold text-green-700">
+                {equipo.g}
+              </td>
+
+              <td className="px-3 py-3 text-center text-[#6B6F76]">
+                {equipo.e}
+              </td>
+
+              <td className="px-3 py-3 text-center text-red-700">{equipo.p}</td>
+
+              <td className="px-3 py-3 text-center">{equipo.favor}</td>
+
+              <td className="px-3 py-3 text-center">{equipo.contra}</td>
+
+              <td
+                className={`px-4 py-3 text-center font-semibold ${
+                  equipo.dif > 0
+                    ? "text-green-700"
+                    : equipo.dif < 0
+                      ? "text-red-700"
+                      : "text-[#2B2D31]"
+                }`}
+              >
+                {equipo.dif > 0 ? `+${equipo.dif}` : equipo.dif}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
     <main className="min-h-screen bg-[#F7F7F8] text-[#2B2D31]">
@@ -278,105 +380,41 @@ function StatsPage() {
           <>
             {tab === "equipos" && (
               <section className="rounded-2xl border border-[#E6E7EA] bg-white shadow-sm">
-                <div className="flex items-center justify-between border-b border-[#E6E7EA] px-4 py-3">
+                <div className="flex flex-col gap-3 border-b border-[#E6E7EA] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-base font-semibold text-[#2B2D31]">
-                      Tabla de posiciones
+                      {tablaEquipos === "vivo"
+                        ? "Tabla en vivo"
+                        : "Tabla oficial"}
                     </h2>
+
                     <p className="mt-0.5 text-xs text-[#6B6F76]">
-                      Ordenada por puntos, diferencia y goles a favor.
+                      {tablaEquipos === "vivo"
+                        ? "Incluye partidos en curso y finalizados."
+                        : "Solo incluye partidos finalizados."}
                     </p>
                   </div>
 
-                  <span className="rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
-                    {estadisticasEquipos.length} equipos
-                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTablaEquipos("vivo")}
+                      className={tablaClass("vivo")}
+                    >
+                      En vivo
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTablaEquipos("oficial")}
+                      className={tablaClass("oficial")}
+                    >
+                      Oficial
+                    </button>
+                  </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px] border-collapse text-sm">
-                    <thead>
-                      <tr className="border-b border-[#E6E7EA] bg-[#FAFAFA] text-left text-xs text-[#6B6F76]">
-                        <th className="w-12 px-4 py-3 font-semibold">#</th>
-                        <th className="px-3 py-3 font-semibold">Equipo</th>
-                        <th className="px-3 py-3 font-semibold">Disciplina</th>
-                        <th className="px-3 py-3 text-center font-semibold">
-                          PJ
-                        </th>
-                        <th className="px-3 py-3 text-center font-semibold">
-                          G
-                        </th>
-                        <th className="px-3 py-3 text-center font-semibold">
-                          E
-                        </th>
-                        <th className="px-3 py-3 text-center font-semibold">
-                          P
-                        </th>
-                        <th className="px-3 py-3 text-center font-semibold">
-                          GF
-                        </th>
-                        <th className="px-3 py-3 text-center font-semibold">
-                          GC
-                        </th>
-                        <th className="px-3 py-3 text-center font-semibold">
-                          DIF
-                        </th>
-                        <th className="px-4 py-3 text-center font-semibold">
-                          PTS
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {estadisticasEquipos.map((equipo, index) => (
-                        <tr
-                          key={equipo.id}
-                          className="border-b border-[#F0F0F1] last:border-b-0 hover:bg-[#FAFAFA]"
-                        >
-                          <td className="px-4 py-3 text-[#6B6F76]">
-                            {index + 1}
-                          </td>
-
-                          <td className="px-3 py-3">
-                            <p className="font-semibold text-[#2B2D31]">
-                              {equipo.nombre}
-                            </p>
-                          </td>
-
-                          <td className="px-3 py-3 text-[#6B6F76]">
-                            {equipo.disciplina}
-                          </td>
-
-                          <td className="px-3 py-3 text-center">{equipo.pj}</td>
-
-                          <td className="px-3 py-3 text-center text-green-700">
-                            {equipo.g}
-                          </td>
-
-                          <td className="px-3 py-3 text-center text-[#6B6F76]">
-                            {equipo.e}
-                          </td>
-
-                          <td className="px-3 py-3 text-center text-red-700">
-                            {equipo.p}
-                          </td>
-
-                          <td className="px-3 py-3 text-center">{equipo.gf}</td>
-
-                          <td className="px-3 py-3 text-center">{equipo.gc}</td>
-
-                          <td className="px-3 py-3 text-center">
-                            {equipo.dif}
-                          </td>
-
-                          <td className="px-4 py-3 text-center font-bold text-[#2B2D31]">
-                            {equipo.pts}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <TablaEquipos datos={estadisticasEquipos} />
               </section>
             )}
 
@@ -387,6 +425,7 @@ function StatsPage() {
                     <h2 className="text-base font-semibold text-[#2B2D31]">
                       Estadísticas por jugador
                     </h2>
+
                     <p className="mt-0.5 text-xs text-[#6B6F76]">
                       Eventos registrados durante los partidos.
                     </p>
@@ -402,20 +441,27 @@ function StatsPage() {
                     <thead>
                       <tr className="border-b border-[#E6E7EA] bg-[#FAFAFA] text-left text-xs text-[#6B6F76]">
                         <th className="px-4 py-3 font-semibold">Jugador</th>
+
                         <th className="px-3 py-3 font-semibold">Equipo</th>
+
                         <th className="px-3 py-3 font-semibold">Disciplina</th>
+
                         <th className="px-3 py-3 text-center font-semibold">
                           Goles
                         </th>
+
                         <th className="px-3 py-3 text-center font-semibold">
                           Puntos
                         </th>
+
                         <th className="px-3 py-3 text-center font-semibold">
                           Faltas
                         </th>
+
                         <th className="px-3 py-3 text-center font-semibold">
                           Tarjetas
                         </th>
+
                         <th className="px-4 py-3 text-center font-semibold">
                           Eventos
                         </th>
@@ -476,6 +522,7 @@ function StatsPage() {
                   <h2 className="text-base font-semibold text-[#2B2D31]">
                     Resumen general
                   </h2>
+
                   <p className="mt-0.5 text-xs text-[#6B6F76]">
                     Datos generales del torneo.
                   </p>

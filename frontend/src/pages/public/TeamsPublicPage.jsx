@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
-import PublicNavbar from "../../components/layout/PublicNavBar";
+import PublicNavbar from "../../components/layout/PublicNavbar";
 
 import { getTeamsRequest } from "../../api/teamsApi";
 import { getPlayersRequest } from "../../api/playersApi";
 import { getDisciplinesRequest } from "../../api/disciplinesApi";
 
-function TeamsPage() {
+function TeamsPublicPage() {
   const [equipos, setEquipos] = useState([]);
   const [jugadores, setJugadores] = useState([]);
   const [disciplinas, setDisciplinas] = useState([]);
@@ -16,8 +17,8 @@ function TeamsPage() {
   const [error, setError] = useState("");
 
   const [filtros, setFiltros] = useState({
-    busqueda: "",
     disciplinaId: "TODAS",
+    busqueda: "",
   });
 
   const cargarDatos = async (silencioso = false) => {
@@ -66,21 +67,21 @@ function TeamsPage() {
   }, [equipos, jugadores]);
 
   const equiposFiltrados = useMemo(() => {
-    const texto = filtros.busqueda.trim().toLowerCase();
+    const textoBusqueda = filtros.busqueda.trim().toLowerCase();
 
     return equiposConDatos
       .filter((equipo) => {
-        const nombre = equipo.nombre?.toLowerCase() || "";
-        const disciplina = equipo.disciplina?.nombre?.toLowerCase() || "";
-
-        const coincideBusqueda =
-          !texto || nombre.includes(texto) || disciplina.includes(texto);
-
         const coincideDisciplina =
           filtros.disciplinaId === "TODAS" ||
           equipo.disciplinaId === Number(filtros.disciplinaId);
 
-        return coincideBusqueda && coincideDisciplina;
+        const coincideBusqueda =
+          !textoBusqueda ||
+          equipo.nombre?.toLowerCase().includes(textoBusqueda) ||
+          equipo.entrenador?.toLowerCase().includes(textoBusqueda) ||
+          equipo.disciplina?.nombre?.toLowerCase().includes(textoBusqueda);
+
+        return coincideDisciplina && coincideBusqueda;
       })
       .sort((a, b) => {
         const disciplinaA = a.disciplina?.nombre || "";
@@ -113,8 +114,8 @@ function TeamsPage() {
 
   const limpiarFiltros = () => {
     setFiltros({
-      busqueda: "",
       disciplinaId: "TODAS",
+      busqueda: "",
     });
   };
 
@@ -166,8 +167,8 @@ function TeamsPage() {
             name="busqueda"
             value={filtros.busqueda}
             onChange={handleFiltro}
-            placeholder="Buscar equipo..."
             className="h-11 rounded-xl border border-[#E6E7EA] bg-white px-3 text-sm outline-none transition focus:border-[#8C1D2C]"
+            placeholder="Buscar equipo..."
           />
 
           <select
@@ -231,7 +232,7 @@ function TeamsPage() {
               <button
                 type="button"
                 onClick={limpiarFiltros}
-                className="mt-4 rounded-xl bg-[#8C1D2C] px-4 py-2 text-sm font-semibold text-white"
+                className="mt-4 rounded-xl bg-[#8C1D2C] px-4 py-2 text-sm font-semibold !text-white transition hover:bg-[#741826]"
               >
                 Limpiar filtros
               </button>
@@ -239,19 +240,20 @@ function TeamsPage() {
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {equiposFiltrados.map((equipo) => (
-                <article
+                <Link
                   key={equipo.id}
+                  to={`/teams/${equipo.id}`}
                   className="rounded-2xl border border-[#E6E7EA] bg-white p-4 shadow-sm transition hover:border-[#8C1D2C] hover:shadow-md"
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-wide text-[#8C1D2C]">
-                        {equipo.disciplina?.nombre || "Sin disciplina"}
+                        {equipo.disciplina?.nombre || "Disciplina"}
                       </p>
 
-                      <h3 className="mt-1 truncate text-xl font-bold text-[#2B2D31]">
+                      <h2 className="mt-1 truncate text-xl font-bold text-[#2B2D31]">
                         {equipo.nombre}
-                      </h3>
+                      </h2>
                     </div>
 
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F8F2E2] text-base font-bold text-[#8C1D2C]">
@@ -301,7 +303,7 @@ function TeamsPage() {
                       </div>
                     </div>
                   )}
-                </article>
+                </Link>
               ))}
             </div>
           )}
@@ -311,4 +313,4 @@ function TeamsPage() {
   );
 }
 
-export default TeamsPage;
+export default TeamsPublicPage;

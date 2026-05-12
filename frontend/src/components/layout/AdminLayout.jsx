@@ -31,33 +31,27 @@ function AdminLayout({ children }) {
     {
       to: "/admin",
       label: "Dashboard",
-      icon: "📊",
       end: true,
     },
     {
       to: "/admin/matches",
       label: "Partidos",
-      icon: "🏆",
     },
     {
       to: "/admin/teams",
       label: "Equipos",
-      icon: "👥",
     },
     {
       to: "/admin/players",
       label: "Jugadores",
-      icon: "🎽",
     },
     {
       to: "/admin/disciplines",
       label: "Disciplinas",
-      icon: "⚽",
     },
     {
       to: "/admin/users",
       label: "Usuarios",
-      icon: "🔐",
     },
   ];
 

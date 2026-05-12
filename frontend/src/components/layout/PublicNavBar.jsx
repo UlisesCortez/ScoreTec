@@ -11,6 +11,10 @@ function PublicNavbar() {
 
   const [menuAbierto, setMenuAbierto] = useState(false);
 
+  const esAdmin = user?.rol === "ADMIN";
+  const esArbitro = user?.rol === "ARBITRO";
+  const esPublico = !esAdmin && !esArbitro;
+
   const cerrarMenu = () => {
     setMenuAbierto(false);
   };
@@ -26,14 +30,14 @@ function PublicNavbar() {
     `rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
       isActive
         ? "bg-[#8C1D2C] !text-white shadow-sm"
-        : "text-[#4B4F56] hover:bg-[#F4F4F5] hover:text-[#8C1D2C]"
+        : "!text-[#4B4F56] hover:bg-[#F4F4F5] hover:!text-[#8C1D2C]"
     }`;
 
   const linkMobileClass = ({ isActive }) =>
     `block rounded-2xl px-4 py-3 text-sm font-semibold transition ${
       isActive
         ? "bg-[#8C1D2C] !text-white"
-        : "text-[#2B2D31] hover:bg-[#F4F4F5] hover:text-[#8C1D2C]"
+        : "!text-[#2B2D31] hover:bg-[#F4F4F5] hover:!text-[#8C1D2C]"
     }`;
 
   const LogoPublico = ({ grande = false }) => (
@@ -43,7 +47,7 @@ function PublicNavbar() {
         alt="ScoreTec"
         className={
           grande
-            ? "h-16 w-auto object-contain sm:h-20 md:h-24"
+            ? "h-14 w-auto object-contain sm:h-16"
             : "h-12 w-auto object-contain sm:h-14 md:h-16 lg:h-20"
         }
       />
@@ -68,32 +72,52 @@ function PublicNavbar() {
           </div>
 
           <nav className="hidden items-center gap-1 md:flex">
-            <NavLink to="/" end className={linkDesktopClass}>
-              Inicio
-            </NavLink>
+            {esArbitro ? (
+              <>
+                <NavLink to="/referee" end className={linkDesktopClass}>
+                  Mis partidos
+                </NavLink>
 
-            <NavLink to="/matches" className={linkDesktopClass}>
-              Partidos
-            </NavLink>
+                <NavLink to="/" end className={linkDesktopClass}>
+                  Inicio
+                </NavLink>
 
-            <NavLink to="/stats" className={linkDesktopClass}>
-              Estadísticas
-            </NavLink>
+                <NavLink to="/matches" className={linkDesktopClass}>
+                  Partidos públicos
+                </NavLink>
 
-            <NavLink to="/teams" className={linkDesktopClass}>
-              Equipos
-            </NavLink>
+                <NavLink to="/stats" className={linkDesktopClass}>
+                  Estadísticas
+                </NavLink>
 
-            {user?.rol === "ADMIN" && (
-              <NavLink to="/admin" className={linkDesktopClass}>
-                Admin
-              </NavLink>
-            )}
+                <NavLink to="/teams" className={linkDesktopClass}>
+                  Equipos
+                </NavLink>
+              </>
+            ) : (
+              <>
+                <NavLink to="/" end className={linkDesktopClass}>
+                  Inicio
+                </NavLink>
 
-            {user?.rol === "ARBITRO" && (
-              <NavLink to="/referee" className={linkDesktopClass}>
-                Árbitro
-              </NavLink>
+                <NavLink to="/matches" className={linkDesktopClass}>
+                  Partidos
+                </NavLink>
+
+                <NavLink to="/stats" className={linkDesktopClass}>
+                  Estadísticas
+                </NavLink>
+
+                <NavLink to="/teams" className={linkDesktopClass}>
+                  Equipos
+                </NavLink>
+
+                {esAdmin && (
+                  <NavLink to="/admin" className={linkDesktopClass}>
+                    Admin
+                  </NavLink>
+                )}
+              </>
             )}
           </nav>
 
@@ -101,11 +125,11 @@ function PublicNavbar() {
             {token ? (
               <>
                 <div className="hidden text-right lg:block">
-                  <p className="max-w-[190px] truncate text-sm font-black text-[#2B2D31]">
+                  <p className="max-w-[190px] truncate text-sm font-semibold text-[#2B2D31]">
                     {user?.nombre}
                   </p>
 
-                  <p className="text-xs font-bold uppercase tracking-wide text-[#6B6F76]">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6B6F76]">
                     {user?.rol}
                   </p>
                 </div>
@@ -113,7 +137,7 @@ function PublicNavbar() {
                 <button
                   type="button"
                   onClick={cerrarSesion}
-                  className="rounded-2xl bg-[#8C1D2C] px-3 py-2.5 text-sm font-black text-white transition hover:bg-[#741826] sm:px-4 sm:py-3"
+                  className="rounded-2xl bg-[#8C1D2C] px-3 py-2.5 text-sm font-semibold !text-white transition hover:bg-[#741826] sm:px-4 sm:py-3"
                 >
                   Salir
                 </button>
@@ -121,7 +145,7 @@ function PublicNavbar() {
             ) : (
               <Link
                 to="/login"
-                className="rounded-2xl bg-[#8C1D2C] px-3 py-2.5 text-sm font-black text-white transition hover:bg-[#741826] sm:px-4 sm:py-3"
+                className="rounded-2xl bg-[#8C1D2C] px-3 py-2.5 text-sm font-semibold !text-white transition hover:bg-[#741826] sm:px-4 sm:py-3"
               >
                 Iniciar sesión
               </Link>
@@ -149,57 +173,147 @@ function PublicNavbar() {
             </div>
 
             <nav className="space-y-2">
-              <NavLink
-                to="/"
-                end
-                className={linkMobileClass}
-                onClick={cerrarMenu}
-              >
-                Inicio
-              </NavLink>
+              {esArbitro && (
+                <>
+                  <NavLink
+                    to="/referee"
+                    end
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Mis partidos
+                  </NavLink>
 
-              <NavLink
-                to="/matches"
-                className={linkMobileClass}
-                onClick={cerrarMenu}
-              >
-                Partidos
-              </NavLink>
+                  <NavLink
+                    to="/"
+                    end
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Inicio
+                  </NavLink>
 
-              <NavLink
-                to="/stats"
-                className={linkMobileClass}
-                onClick={cerrarMenu}
-              >
-                Estadísticas
-              </NavLink>
+                  <NavLink
+                    to="/matches"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Partidos públicos
+                  </NavLink>
 
-              <NavLink
-                to="/teams"
-                className={linkMobileClass}
-                onClick={cerrarMenu}
-              >
-                Equipos
-              </NavLink>
+                  <NavLink
+                    to="/stats"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Estadísticas
+                  </NavLink>
 
-              {user?.rol === "ADMIN" && (
-                <NavLink
-                  to="/admin"
-                  className={linkMobileClass}
-                  onClick={cerrarMenu}
-                >
-                  Panel admin
-                </NavLink>
+                  <NavLink
+                    to="/teams"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Equipos
+                  </NavLink>
+                </>
               )}
 
-              {user?.rol === "ARBITRO" && (
-                <NavLink
-                  to="/referee"
-                  className={linkMobileClass}
-                  onClick={cerrarMenu}
-                >
-                  Panel árbitro
-                </NavLink>
+              {esAdmin && (
+                <>
+                  <NavLink
+                    to="/admin"
+                    end
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Dashboard
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/matches"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Partidos
+                  </NavLink>
+                  <NavLink to="/calendar" className={linkDesktopClass}>
+                    Calendario
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/teams"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Equipos
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/players"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Jugadores
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/disciplines"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Disciplinas
+                  </NavLink>
+
+                  <NavLink
+                    to="/admin/users"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Usuarios
+                  </NavLink>
+                </>
+              )}
+
+              {esPublico && (
+                <>
+                  <NavLink
+                    to="/"
+                    end
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Inicio
+                  </NavLink>
+
+                  <NavLink
+                    to="/matches"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Partidos
+                  </NavLink>
+
+                  <NavLink
+                    to="/stats"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Estadísticas
+                  </NavLink>
+
+                  <NavLink
+                    to="/teams"
+                    className={linkMobileClass}
+                    onClick={cerrarMenu}
+                  >
+                    Equipos
+                  </NavLink>
+
+                  <NavLink to="/calendar" className={linkDesktopClass}>
+                    Calendario
+                  </NavLink>
+                </>
               )}
             </nav>
 
@@ -207,15 +321,15 @@ function PublicNavbar() {
               {token ? (
                 <>
                   <div className="rounded-3xl border border-[#E6E7EA] bg-[#FAFAFA] p-4">
-                    <p className="text-sm font-black text-[#2B2D31]">
+                    <p className="text-sm font-semibold text-[#2B2D31]">
                       {user?.nombre}
                     </p>
 
-                    <p className="mt-1 break-all text-xs font-medium text-[#6B6F76]">
+                    <p className="mt-1 break-all text-xs text-[#6B6F76]">
                       {user?.email}
                     </p>
 
-                    <p className="mt-3 inline-block rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-black text-[#8C1D2C]">
+                    <p className="mt-3 inline-block rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
                       {user?.rol}
                     </p>
                   </div>
@@ -223,7 +337,7 @@ function PublicNavbar() {
                   <button
                     type="button"
                     onClick={cerrarSesion}
-                    className="mt-4 w-full rounded-2xl border border-[#8C1D2C] bg-white px-4 py-3 text-sm font-black text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:text-white"
+                    className="mt-4 w-full rounded-2xl border border-[#8C1D2C] bg-white px-4 py-3 text-sm font-semibold !text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:!text-white"
                   >
                     Cerrar sesión
                   </button>
@@ -232,7 +346,7 @@ function PublicNavbar() {
                 <Link
                   to="/login"
                   onClick={cerrarMenu}
-                  className="block w-full rounded-2xl bg-[#8C1D2C] px-4 py-3 text-center text-sm font-black text-white transition hover:bg-[#741826]"
+                  className="block w-full rounded-2xl bg-[#8C1D2C] px-4 py-3 text-center text-sm font-semibold !text-white transition hover:bg-[#741826]"
                 >
                   Iniciar sesión
                 </Link>

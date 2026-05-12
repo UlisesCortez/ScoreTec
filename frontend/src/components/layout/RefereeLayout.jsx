@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
+import logoScoreTec from "../../assets/brand/scoretec-logo.png";
+
 function RefereeLayout({ children }) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("scoretec_user"));
+
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   const cerrarSesion = () => {
@@ -17,20 +20,33 @@ function RefereeLayout({ children }) {
   };
 
   const linkClass = ({ isActive }) =>
-    `block rounded-xl px-4 py-3 text-sm font-semibold transition ${
+    `block rounded-2xl px-4 py-3 text-sm font-semibold transition ${
       isActive
-        ? "bg-[#8C1D2C] text-white"
-        : "text-[#4B4F56] hover:bg-[#F4F4F5] hover:text-[#8C1D2C]"
+        ? "bg-[#8C1D2C] !text-white"
+        : "!text-[#4B4F56] hover:bg-[#F4F4F5] hover:!text-[#8C1D2C]"
     }`;
+
+  const LogoReferee = ({ compacto = false }) => (
+    <div className="flex items-center justify-center">
+      <img
+        src={logoScoreTec}
+        alt="ScoreTec"
+        className={
+          compacto ? "h-10 w-auto object-contain" : "h-16 w-auto object-contain"
+        }
+      />
+    </div>
+  );
 
   const SidebarContent = ({ mostrarLogo = true }) => (
     <div className="flex h-full flex-col">
       {mostrarLogo && (
         <div className="mb-8">
-          <h1 className="text-2xl font-black tracking-tight text-[#2B2D31]">
-            Score<span className="text-[#8C1D2C]">Tec</span>
-          </h1>
-          <p className="mt-1 text-sm text-[#6B6F76]">Panel de árbitro</p>
+          <LogoReferee />
+
+          <p className="mt-2 text-center text-sm font-semibold text-[#6B6F76]">
+            Panel de árbitro
+          </p>
         </div>
       )}
 
@@ -39,18 +55,26 @@ function RefereeLayout({ children }) {
           Mis partidos
         </NavLink>
 
-        <NavLink to="/matches" className={linkClass} onClick={cerrarMenu}>
-          Vista pública
+        <NavLink to="/" end className={linkClass} onClick={cerrarMenu}>
+          Inicio
         </NavLink>
 
-        <NavLink to="/" className={linkClass} onClick={cerrarMenu}>
-          Inicio
+        <NavLink to="/matches" className={linkClass} onClick={cerrarMenu}>
+          Partidos públicos
+        </NavLink>
+
+        <NavLink to="/stats" className={linkClass} onClick={cerrarMenu}>
+          Estadísticas
+        </NavLink>
+
+        <NavLink to="/teams" className={linkClass} onClick={cerrarMenu}>
+          Equipos
         </NavLink>
       </nav>
 
       <div className="mt-auto">
-        <div className="rounded-2xl border border-[#E6E7EA] bg-[#FAFAFA] p-4">
-          <p className="text-sm font-bold text-[#2B2D31]">
+        <div className="rounded-3xl border border-[#E6E7EA] bg-[#FAFAFA] p-4">
+          <p className="text-sm font-semibold text-[#2B2D31]">
             {user?.nombre || "Árbitro"}
           </p>
 
@@ -58,7 +82,7 @@ function RefereeLayout({ children }) {
             {user?.email || "Sin correo"}
           </p>
 
-          <p className="mt-3 inline-block rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-bold text-[#8C1D2C]">
+          <p className="mt-3 inline-block rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
             {user?.rol || "ARBITRO"}
           </p>
         </div>
@@ -66,7 +90,7 @@ function RefereeLayout({ children }) {
         <button
           type="button"
           onClick={cerrarSesion}
-          className="mt-4 w-full rounded-xl border border-[#8C1D2C] px-4 py-3 text-sm font-bold text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:text-white"
+          className="mt-4 w-full rounded-2xl border border-[#8C1D2C] bg-white px-4 py-3 text-sm font-semibold !text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:!text-white"
         >
           Cerrar sesión
         </button>
@@ -77,7 +101,7 @@ function RefereeLayout({ children }) {
   return (
     <main className="min-h-screen bg-[#F7F7F8] text-[#2B2D31]">
       <div className="flex min-h-screen">
-        <aside className="sticky top-0 hidden h-screen w-72 border-r border-[#E6E7EA] bg-white p-6 lg:block">
+        <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-[#E6E7EA] bg-white p-6 lg:block">
           <SidebarContent />
         </aside>
 
@@ -88,16 +112,14 @@ function RefereeLayout({ children }) {
               onClick={cerrarMenu}
             />
 
-            <aside className="absolute left-0 top-0 flex h-screen w-[290px] max-w-[85vw] flex-col bg-white p-5 shadow-2xl">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-black text-[#2B2D31]">
-                  Score<span className="text-[#8C1D2C]">Tec</span>
-                </h2>
+            <aside className="absolute left-0 top-0 flex h-screen w-[300px] max-w-[85vw] flex-col bg-white p-5 shadow-2xl">
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <LogoReferee compacto />
 
                 <button
                   type="button"
                   onClick={cerrarMenu}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold text-[#2B2D31]"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold text-[#2B2D31] transition hover:border-[#8C1D2C] hover:text-[#8C1D2C]"
                   aria-label="Cerrar menú"
                 >
                   ×
@@ -115,17 +137,16 @@ function RefereeLayout({ children }) {
               <button
                 type="button"
                 onClick={() => setMenuAbierto(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#E6E7EA] text-2xl font-bold text-[#2B2D31] transition hover:border-[#8C1D2C] hover:text-[#8C1D2C]"
                 aria-label="Abrir menú"
               >
                 ☰
               </button>
 
-              <div className="text-center">
-                <h1 className="text-xl font-black leading-none">
-                  Score<span className="text-[#8C1D2C]">Tec</span>
-                </h1>
-                <p className="mt-1 text-[11px] font-semibold text-[#6B6F76]">
+              <div className="flex flex-col items-center">
+                <LogoReferee compacto />
+
+                <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#6B6F76]">
                   Árbitro
                 </p>
               </div>
@@ -133,7 +154,7 @@ function RefereeLayout({ children }) {
               <button
                 type="button"
                 onClick={cerrarSesion}
-                className="rounded-xl bg-[#8C1D2C] px-3 py-2 text-xs font-bold text-white"
+                className="shrink-0 rounded-2xl bg-[#8C1D2C] px-4 py-3 text-sm font-semibold !text-white transition hover:bg-[#741826]"
               >
                 Salir
               </button>
