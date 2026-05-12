@@ -1,7 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Poppins", system-ui, Avenir, Helvetica, Arial, sans-serif;
 
   --color-carbon: #2b2d31;
   --color-granate: #8c1d2c;
@@ -11,6 +12,16 @@
 
   color: var(--color-carbon);
   background-color: var(--color-blanco-suave);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-blanco-suave);
 }
 
 body {
@@ -18,4 +29,31 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--color-blanco-suave);
+  color: var(--color-carbon);
+  font-family: "Poppins", system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+::selection {
+  background-color: var(--color-granate);
+  color: white;
 }

@@ -1,26 +1,35 @@
 import { Link } from "react-router-dom";
 
 function MatchCard({ partido }) {
-  const estadoClase = {
-    PROXIMO: "bg-blue-50 text-blue-700 border-blue-100",
-    EN_CURSO: "bg-green-50 text-green-700 border-green-100",
-    FINALIZADO: "bg-gray-100 text-gray-600 border-gray-200",
-    CANCELADO: "bg-red-50 text-red-700 border-red-100",
-  };
-
   const estadoTexto = {
     PROXIMO: "Próximo",
-    EN_CURSO: "En curso",
-    FINALIZADO: "Finalizado",
+    EN_CURSO: "En vivo",
+    FINALIZADO: "Final",
     CANCELADO: "Cancelado",
   };
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return "Sin fecha";
+  const estadoClase = {
+    PROXIMO: "bg-blue-50 text-blue-700",
+    EN_CURSO: "bg-green-50 text-green-700",
+    FINALIZADO: "bg-[#F1F2F4] text-[#4B4F56]",
+    CANCELADO: "bg-red-50 text-red-700",
+  };
 
-    return new Date(fecha).toLocaleString("es-MX", {
-      dateStyle: "medium",
-      timeStyle: "short",
+  const formatearFecha = (fecha) => {
+    if (!fecha) return "--";
+
+    return new Date(fecha).toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "short",
+    });
+  };
+
+  const formatearHora = (fecha) => {
+    if (!fecha) return "Sin hora";
+
+    return new Date(fecha).toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -28,71 +37,78 @@ function MatchCard({ partido }) {
   const marcadorVisitante = partido.marcadorVisitante ?? 0;
 
   return (
-    <article className="group rounded-2xl border border-[#E6E7EA] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="mb-3 flex items-start justify-between gap-3">
+    <Link
+      to={`/matches/${partido.id}`}
+      className="block rounded-2xl border border-[#E6E7EA] bg-white px-3 py-3 transition hover:border-[#8C1D2C] hover:shadow-sm"
+    >
+      <div className="mb-2 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-xs font-black uppercase tracking-wide text-[#8C1D2C]">
+          <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-[#8C1D2C]">
             {partido.disciplina?.nombre || "Disciplina"}
-          </p>
-
-          <p className="mt-1 truncate text-xs font-medium text-[#6B6F76]">
-            {formatearFecha(partido.fecha)}
           </p>
         </div>
 
-        <span
-          className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-bold ${
-            estadoClase[partido.estado] ||
-            "bg-gray-100 text-gray-600 border-gray-200"
-          }`}
-        >
-          {estadoTexto[partido.estado] || partido.estado || "Sin estado"}
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <span
+            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+              estadoClase[partido.estado] || "bg-[#F1F2F4] text-[#4B4F56]"
+            }`}
+          >
+            {estadoTexto[partido.estado] || partido.estado || "Sin estado"}
+          </span>
+
+          <span className="text-[11px] text-[#6B6F76]">
+            {formatearHora(partido.fecha)}
+          </span>
+        </div>
       </div>
 
-      <div className="rounded-2xl bg-[#FAFAFA] p-3">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-          <div className="min-w-0 text-right">
-            <h3 className="truncate text-sm font-bold text-[#2B2D31]">
-              {partido.equipoLocal?.nombre || "Local"}
-            </h3>
-            <p className="mt-0.5 text-[11px] font-medium text-[#6B6F76]">
-              Local
+      <div className="grid grid-cols-[1fr_auto] gap-3">
+        <div className="min-w-0 space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F8F2E2] text-[10px] font-semibold text-[#8C1D2C]">
+                L
+              </div>
+
+              <p className="truncate text-sm font-semibold text-[#2B2D31]">
+                {partido.equipoLocal?.nombre || "Local"}
+              </p>
+            </div>
+
+            <p className="shrink-0 text-xl font-bold text-[#2B2D31]">
+              {marcadorLocal}
             </p>
           </div>
 
-          <div className="min-w-[86px] rounded-xl bg-white px-3 py-2 text-center shadow-sm">
-            <p className="text-2xl font-black leading-none text-[#2B2D31]">
-              {marcadorLocal}
-              <span className="mx-2 text-[#CDAA43]">-</span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FAFAFA] text-[10px] font-semibold text-[#6B6F76]">
+                V
+              </div>
+
+              <p className="truncate text-sm font-semibold text-[#2B2D31]">
+                {partido.equipoVisitante?.nombre || "Visitante"}
+              </p>
+            </div>
+
+            <p className="shrink-0 text-xl font-bold text-[#2B2D31]">
               {marcadorVisitante}
             </p>
           </div>
+        </div>
 
-          <div className="min-w-0">
-            <h3 className="truncate text-sm font-bold text-[#2B2D31]">
-              {partido.equipoVisitante?.nombre || "Visitante"}
-            </h3>
-            <p className="mt-0.5 text-[11px] font-medium text-[#6B6F76]">
-              Visitante
-            </p>
-          </div>
+        <div className="flex flex-col items-end justify-between">
+          <p className="rounded-xl bg-[#FAFAFA] px-2.5 py-1 text-[11px] font-semibold text-[#6B6F76]">
+            {formatearFecha(partido.fecha)}
+          </p>
+
+          <p className="max-w-[92px] truncate text-right text-[11px] text-[#6B6F76]">
+            {partido.ubicacionNombre || "Sin sede"}
+          </p>
         </div>
       </div>
-
-      <div className="mt-3 flex items-center justify-between gap-3">
-        <p className="min-w-0 truncate text-xs font-medium text-[#6B6F76]">
-          {partido.ubicacionNombre || "Ubicación no registrada"}
-        </p>
-
-        <Link
-          to={`/matches/${partido.id}`}
-          className="shrink-0 rounded-xl border border-[#8C1D2C] px-3 py-2 text-xs font-bold text-[#8C1D2C] transition group-hover:bg-[#8C1D2C] group-hover:text-white"
-        >
-          Detalle
-        </Link>
-      </div>
-    </article>
+    </Link>
   );
 }
 

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
+import logoScoreTec from "../../assets/brand/scoretec-logo.png";
+import iconoScoreTec from "../../assets/brand/scoretec-icon.png";
+
 function AdminLayout({ children }) {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("scoretec_user"));
@@ -58,17 +61,23 @@ function AdminLayout({ children }) {
     },
   ];
 
+  const LogoAdmin = ({ compacto = false }) => (
+    <div className="flex items-center justify-center">
+      <img
+        src={logoScoreTec}
+        alt="ScoreTec"
+        className={
+          compacto ? "h-12 w-auto object-contain" : "h-16 w-auto object-contain"
+        }
+      />
+    </div>
+  );
+
   const SidebarContent = ({ mostrarLogo = true }) => (
     <div className="flex h-full flex-col">
       {mostrarLogo && (
         <div className="mb-8">
-          <h1 className="text-2xl font-black tracking-tight text-[#2B2D31]">
-            Score<span className="text-[#8C1D2C]">Tec</span>
-          </h1>
-
-          <p className="mt-1 text-sm font-medium text-[#6B6F76]">
-            Panel administrativo
-          </p>
+          <LogoAdmin />
         </div>
       )}
 
@@ -128,15 +137,13 @@ function AdminLayout({ children }) {
             />
 
             <aside className="absolute left-0 top-0 flex h-screen w-[300px] max-w-[85vw] flex-col bg-white p-5 shadow-2xl">
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-2xl font-black text-[#2B2D31]">
-                  Score<span className="text-[#8C1D2C]">Tec</span>
-                </h2>
+              <div className="mb-6 flex items-center justify-between gap-3">
+                <LogoAdmin compacto />
 
                 <button
                   type="button"
                   onClick={cerrarMenu}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold text-[#2B2D31] transition hover:border-[#8C1D2C] hover:text-[#8C1D2C]"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold text-[#2B2D31] transition hover:border-[#8C1D2C] hover:text-[#8C1D2C]"
                   aria-label="Cerrar menú"
                 >
                   ×
@@ -154,26 +161,18 @@ function AdminLayout({ children }) {
               <button
                 type="button"
                 onClick={() => setMenuAbierto(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold text-[#2B2D31] transition hover:border-[#8C1D2C] hover:text-[#8C1D2C]"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E6E7EA] text-xl font-bold text-[#2B2D31] transition hover:border-[#8C1D2C] hover:text-[#8C1D2C]"
                 aria-label="Abrir menú"
               >
                 ☰
               </button>
 
-              <div className="min-w-0 text-center">
-                <h1 className="truncate text-xl font-black leading-none text-[#2B2D31]">
-                  Score<span className="text-[#8C1D2C]">Tec</span>
-                </h1>
-
-                <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-[#6B6F76]">
-                  Admin
-                </p>
-              </div>
+              <LogoAdmin compacto />
 
               <button
                 type="button"
                 onClick={cerrarSesion}
-                className="rounded-xl bg-[#8C1D2C] px-3 py-2 text-xs font-black text-white transition hover:bg-[#741826]"
+                className="shrink-0 rounded-xl bg-[#8C1D2C] px-3 py-2 text-xs font-black text-white transition hover:bg-[#741826]"
               >
                 Salir
               </button>

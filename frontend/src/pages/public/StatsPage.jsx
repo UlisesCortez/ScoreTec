@@ -1,264 +1,532 @@
 import { useEffect, useMemo, useState } from "react";
 
-import PublicNavbar from "../../components/layout/PublicNavbar";
+import PublicNavbar from "../../components/layout/PublicNavBar";
 
-import { getPlayerStatsRequest, getTeamStatsRequest } from "../../api/statsApi";
+import { getMatchesRequest } from "../../api/matchesApi";
+import { getTeamsRequest } from "../../api/teamsApi";
+import { getPlayersRequest } from "../../api/playersApi";
+import { getEventsByMatchRequest } from "../../api/eventsApi";
 
 function StatsPage() {
+  const [tab, setTab] = useState("equipos");
+
+  const [partidos, setPartidos] = useState([]);
   const [equipos, setEquipos] = useState([]);
   const [jugadores, setJugadores] = useState([]);
+  const [eventos, setEventos] = useState([]);
+
   const [cargando, setCargando] = useState(true);
+  const [actualizando, setActualizando] = useState(false);
   const [error, setError] = useState("");
 
-  const [vista, setVista] = useState("equipos");
-
-  const cargarEstadisticas = async () => {
+  const cargarDatos = async (silencioso = false) => {
     try {
-      setCargando(true);
+      if (silencioso) {
+        setActualizando(true);
+      } else {
+        setCargando(true);
+      }
 
-      const [equiposData, jugadoresData] = await Promise.all([
-        getTeamStatsRequest(),
-        getPlayerStatsRequest(),
+      setError("");
+
+      const [partidosData, equiposData, jugadoresData] = await Promise.all([
+        getMatchesRequest(),
+        getTeamsRequest(),
+        getPlayersRequest(),
       ]);
 
+      let eventosData = [];
+
+      try {
+        const eventosPorPartido = await Promise.all(
+          partidosData.map((partido) => getEventsByMatchRequest(partido.id)),
+        );
+
+        eventosData = eventosPorPartido.flat();
+      } catch (error) {
+        eventosData = [];
+      }
+
+      setPartidos(partidosData);
       setEquipos(equiposData);
       setJugadores(jugadoresData);
+      setEventos(eventosData);
     } catch (error) {
       setError("No se pudieron cargar las estadísticas.");
     } finally {
       setCargando(false);
+      setActualizando(false);
     }
   };
 
   useEffect(() => {
-    cargarEstadisticas();
+    cargarDatos();
+
+    const intervalo = setInterval(() => {
+      cargarDatos(true);
+    }, 15000);
+
+    return () => clearInterval(intervalo);
   }, []);
 
-  const mejoresEquipos = useMemo(() => {
-    return [...equipos].sort((a, b) => {
-      if (b.ganados !== a.ganados) return b.ganados - a.ganados;
-      return b.puntosFavor - a.puntosFavor;
-    });
-  }, [equipos]);
+  const estadisticasEquipos = useMemo(() => {
+    const mapa = new Map();
 
-  const mejoresJugadores = useMemo(() => {
-    return [...jugadores].sort((a, b) => {
-      if (b.puntos !== a.puntos) return b.puntos - a.puntos;
-      return b.totalEventos - a.totalEventos;
+    equipos.forEach((equipo) => {
+      mapa.set(equipo.id, {
+        id: equipo.id,
+        nombre: equipo.nombre,
+        disciplina: equipo.disciplina?.nombre || "Sin disciplina",
+        pj: 0,
+        g: 0,
+        e: 0,
+        p: 0,
+        gf: 0,
+        gc: 0,
+        dif: 0,
+        pts: 0,
+      });
     });
-  }, [jugadores]);
+
+    partidos
+      .filter((partido) => partido.estado === "FINALIZADO")
+      .forEach((partido) => {
+        const local = mapa.get(partido.equipoLocalId);
+        const visitante = mapa.get(partido.equipoVisitanteId);
+
+        if (!local || !visitante) return;
+
+        const marcadorLocal = partido.marcadorLocal ?? 0;
+        const marcadorVisitante = partido.marcadorVisitante ?? 0;
+
+        local.pj += 1;
+        visitante.pj += 1;
+
+        local.gf += marcadorLocal;
+        local.gc += marcadorVisitante;
+
+        visitante.gf += marcadorVisitante;
+        visitante.gc += marcadorLocal;
+
+        if (marcadorLocal > marcadorVisitante) {
+          local.g += 1;
+          local.pts += 3;
+          visitante.p += 1;
+        } else if (marcadorLocal < marcadorVisitante) {
+          visitante.g += 1;
+          visitante.pts += 3;
+          local.p += 1;
+        } else {
+          local.e += 1;
+          visitante.e += 1;
+          local.pts += 1;
+          visitante.pts += 1;
+        }
+
+        local.dif = local.gf - local.gc;
+        visitante.dif = visitante.gf - visitante.gc;
+      });
+
+    return Array.from(mapa.values()).sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      if (b.dif !== a.dif) return b.dif - a.dif;
+      if (b.gf !== a.gf) return b.gf - a.gf;
+      return a.nombre.localeCompare(b.nombre);
+    });
+  }, [equipos, partidos]);
+
+  const estadisticasJugadores = useMemo(() => {
+    const mapa = new Map();
+
+    jugadores.forEach((jugador) => {
+      mapa.set(jugador.id, {
+        id: jugador.id,
+        nombre: jugador.nombre,
+        numero: jugador.numero,
+        equipo: jugador.equipo?.nombre || "Sin equipo",
+        disciplina: jugador.equipo?.disciplina?.nombre || "Sin disciplina",
+        goles: 0,
+        puntos: 0,
+        faltas: 0,
+        tarjetas: 0,
+        eventos: 0,
+      });
+    });
+
+    eventos.forEach((evento) => {
+      if (!evento.jugadorId) return;
+
+      const jugador = mapa.get(evento.jugadorId);
+      if (!jugador) return;
+
+      jugador.eventos += 1;
+
+      if (evento.tipo === "GOL") {
+        jugador.goles += 1;
+      }
+
+      if (evento.tipo === "PUNTO" || evento.tipo === "ENCESTA") {
+        jugador.puntos += 1;
+      }
+
+      if (evento.tipo === "FALTA") {
+        jugador.faltas += 1;
+      }
+
+      if (
+        evento.tipo === "TARJETA_AMARILLA" ||
+        evento.tipo === "TARJETA_ROJA"
+      ) {
+        jugador.tarjetas += 1;
+      }
+    });
+
+    return Array.from(mapa.values()).sort((a, b) => {
+      if (b.goles !== a.goles) return b.goles - a.goles;
+      if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+      if (b.eventos !== a.eventos) return b.eventos - a.eventos;
+      return a.nombre.localeCompare(b.nombre);
+    });
+  }, [jugadores, eventos]);
+
+  const resumen = useMemo(() => {
+    return {
+      partidos: partidos.length,
+      enCurso: partidos.filter((partido) => partido.estado === "EN_CURSO")
+        .length,
+      finalizados: partidos.filter((partido) => partido.estado === "FINALIZADO")
+        .length,
+      equipos: equipos.length,
+      jugadores: jugadores.length,
+      eventos: eventos.length,
+    };
+  }, [partidos, equipos, jugadores, eventos]);
+
+  const tabClass = (value) =>
+    `shrink-0 border-b-2 px-1 pb-2 text-sm font-semibold transition ${
+      tab === value
+        ? "border-[#8C1D2C] text-[#8C1D2C]"
+        : "border-transparent text-[#6B6F76] hover:text-[#8C1D2C]"
+    }`;
 
   return (
-    <main className="min-h-screen bg-[#FAFAFA] text-[#2B2D31]">
+    <main className="min-h-screen bg-[#F7F7F8] text-[#2B2D31]">
       <PublicNavbar />
 
-      <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="mb-8 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-[#8C1D2C]">
-              Rendimiento deportivo
-            </p>
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <header className="mb-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#8C1D2C]">
+                Rendimiento deportivo
+              </p>
 
-            <h1 className="mt-2 text-4xl font-bold">Estadísticas</h1>
+              <h1 className="text-2xl font-bold leading-tight text-[#2B2D31]">
+                Estadísticas
+              </h1>
+            </div>
 
-            <p className="mt-3 max-w-2xl text-[#6B6F76]">
-              Consulta el desempeño de equipos y jugadores registrados en los
-              torneos deportivos del TecNM Campus Nogales.
-            </p>
-          </div>
-
-          <div className="flex rounded-2xl border border-[#E6E7EA] bg-white p-1 shadow-sm">
             <button
               type="button"
-              onClick={() => setVista("equipos")}
-              className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                vista === "equipos"
-                  ? "bg-[#8C1D2C] text-white"
-                  : "text-[#6B6F76] hover:text-[#2B2D31]"
-              }`}
+              onClick={() => cargarDatos(true)}
+              disabled={actualizando || cargando}
+              className="rounded-xl border border-[#E6E7EA] bg-white px-3 py-2 text-xs font-semibold text-[#4B4F56] transition hover:border-[#8C1D2C] hover:text-[#8C1D2C] disabled:opacity-60"
+            >
+              {actualizando ? "Actualizando" : "Actualizar"}
+            </button>
+          </div>
+
+          <div className="flex gap-5 overflow-x-auto border-b border-[#E6E7EA]">
+            <button
+              type="button"
+              onClick={() => setTab("equipos")}
+              className={tabClass("equipos")}
             >
               Equipos
             </button>
 
             <button
               type="button"
-              onClick={() => setVista("jugadores")}
-              className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                vista === "jugadores"
-                  ? "bg-[#8C1D2C] text-white"
-                  : "text-[#6B6F76] hover:text-[#2B2D31]"
-              }`}
+              onClick={() => setTab("jugadores")}
+              className={tabClass("jugadores")}
             >
               Jugadores
             </button>
+
+            <button
+              type="button"
+              onClick={() => setTab("resumen")}
+              className={tabClass("resumen")}
+            >
+              Resumen
+            </button>
           </div>
-        </div>
+        </header>
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
             {error}
           </div>
         )}
 
         {cargando ? (
-          <p className="text-[#6B6F76]">Cargando estadísticas...</p>
-        ) : vista === "equipos" ? (
-          <section className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Estadísticas por equipo</h2>
-
-              <span className="rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
-                {equipos.length} equipos
-              </span>
-            </div>
-
-            {mejoresEquipos.length === 0 ? (
-              <p className="text-sm text-[#6B6F76]">
-                Todavía no hay estadísticas de equipos.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-[#E6E7EA] text-[#6B6F76]">
-                      <th className="px-3 py-3 font-semibold">Equipo</th>
-                      <th className="px-3 py-3 font-semibold">Disciplina</th>
-                      <th className="px-3 py-3 font-semibold">PJ</th>
-                      <th className="px-3 py-3 font-semibold">G</th>
-                      <th className="px-3 py-3 font-semibold">E</th>
-                      <th className="px-3 py-3 font-semibold">P</th>
-                      <th className="px-3 py-3 font-semibold">Puntos</th>
-                      <th className="px-3 py-3 font-semibold">Faltas</th>
-                      <th className="px-3 py-3 font-semibold">Tarjetas</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {mejoresEquipos.map((equipo) => (
-                      <tr
-                        key={equipo.equipoId}
-                        className="border-b border-[#F0F0F1]"
-                      >
-                        <td className="px-3 py-4 font-semibold">
-                          {equipo.equipo}
-                        </td>
-
-                        <td className="px-3 py-4 text-[#6B6F76]">
-                          {equipo.disciplina}
-                        </td>
-
-                        <td className="px-3 py-4">{equipo.partidosJugados}</td>
-
-                        <td className="px-3 py-4 text-green-700">
-                          {equipo.ganados}
-                        </td>
-
-                        <td className="px-3 py-4 text-[#6B6F76]">
-                          {equipo.empatados}
-                        </td>
-
-                        <td className="px-3 py-4 text-red-700">
-                          {equipo.perdidos}
-                        </td>
-
-                        <td className="px-3 py-4 font-semibold">
-                          {equipo.puntosFavor}
-                        </td>
-
-                        <td className="px-3 py-4">{equipo.faltas}</td>
-
-                        <td className="px-3 py-4">
-                          <span className="text-yellow-700">
-                            {equipo.tarjetasAmarillas}
-                          </span>
-                          <span className="mx-1 text-[#CBD0D6]">/</span>
-                          <span className="text-red-700">
-                            {equipo.tarjetasRojas}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
+          <div className="space-y-3">
+            <div className="h-12 animate-pulse rounded-2xl bg-[#F1F2F4]" />
+            <div className="h-96 animate-pulse rounded-2xl bg-[#F1F2F4]" />
+          </div>
         ) : (
-          <section className="rounded-3xl border border-[#E6E7EA] bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
-                Estadísticas por jugador
-              </h2>
+          <>
+            {tab === "equipos" && (
+              <section className="rounded-2xl border border-[#E6E7EA] bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-[#E6E7EA] px-4 py-3">
+                  <div>
+                    <h2 className="text-base font-semibold text-[#2B2D31]">
+                      Tabla de posiciones
+                    </h2>
+                    <p className="mt-0.5 text-xs text-[#6B6F76]">
+                      Ordenada por puntos, diferencia y goles a favor.
+                    </p>
+                  </div>
 
-              <span className="rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
-                {jugadores.length} jugadores
-              </span>
-            </div>
+                  <span className="rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
+                    {estadisticasEquipos.length} equipos
+                  </span>
+                </div>
 
-            {mejoresJugadores.length === 0 ? (
-              <p className="text-sm text-[#6B6F76]">
-                Todavía no hay estadísticas de jugadores.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-[#E6E7EA] text-[#6B6F76]">
-                      <th className="px-3 py-3 font-semibold">Jugador</th>
-                      <th className="px-3 py-3 font-semibold">Equipo</th>
-                      <th className="px-3 py-3 font-semibold">Disciplina</th>
-                      <th className="px-3 py-3 font-semibold">Número</th>
-                      <th className="px-3 py-3 font-semibold">Puntos</th>
-                      <th className="px-3 py-3 font-semibold">Asist.</th>
-                      <th className="px-3 py-3 font-semibold">Faltas</th>
-                      <th className="px-3 py-3 font-semibold">Tarjetas</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {mejoresJugadores.map((jugador) => (
-                      <tr
-                        key={jugador.jugadorId}
-                        className="border-b border-[#F0F0F1]"
-                      >
-                        <td className="px-3 py-4 font-semibold">
-                          {jugador.jugador}
-                        </td>
-
-                        <td className="px-3 py-4 text-[#6B6F76]">
-                          {jugador.equipo}
-                        </td>
-
-                        <td className="px-3 py-4 text-[#6B6F76]">
-                          {jugador.disciplina}
-                        </td>
-
-                        <td className="px-3 py-4">{jugador.numero || "—"}</td>
-
-                        <td className="px-3 py-4 font-semibold">
-                          {jugador.puntos}
-                        </td>
-
-                        <td className="px-3 py-4">{jugador.asistencias}</td>
-
-                        <td className="px-3 py-4">{jugador.faltas}</td>
-
-                        <td className="px-3 py-4">
-                          <span className="text-yellow-700">
-                            {jugador.tarjetasAmarillas}
-                          </span>
-                          <span className="mx-1 text-[#CBD0D6]">/</span>
-                          <span className="text-red-700">
-                            {jugador.tarjetasRojas}
-                          </span>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px] border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-[#E6E7EA] bg-[#FAFAFA] text-left text-xs text-[#6B6F76]">
+                        <th className="w-12 px-4 py-3 font-semibold">#</th>
+                        <th className="px-3 py-3 font-semibold">Equipo</th>
+                        <th className="px-3 py-3 font-semibold">Disciplina</th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          PJ
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          G
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          E
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          P
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          GF
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          GC
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          DIF
+                        </th>
+                        <th className="px-4 py-3 text-center font-semibold">
+                          PTS
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+
+                    <tbody>
+                      {estadisticasEquipos.map((equipo, index) => (
+                        <tr
+                          key={equipo.id}
+                          className="border-b border-[#F0F0F1] last:border-b-0 hover:bg-[#FAFAFA]"
+                        >
+                          <td className="px-4 py-3 text-[#6B6F76]">
+                            {index + 1}
+                          </td>
+
+                          <td className="px-3 py-3">
+                            <p className="font-semibold text-[#2B2D31]">
+                              {equipo.nombre}
+                            </p>
+                          </td>
+
+                          <td className="px-3 py-3 text-[#6B6F76]">
+                            {equipo.disciplina}
+                          </td>
+
+                          <td className="px-3 py-3 text-center">{equipo.pj}</td>
+
+                          <td className="px-3 py-3 text-center text-green-700">
+                            {equipo.g}
+                          </td>
+
+                          <td className="px-3 py-3 text-center text-[#6B6F76]">
+                            {equipo.e}
+                          </td>
+
+                          <td className="px-3 py-3 text-center text-red-700">
+                            {equipo.p}
+                          </td>
+
+                          <td className="px-3 py-3 text-center">{equipo.gf}</td>
+
+                          <td className="px-3 py-3 text-center">{equipo.gc}</td>
+
+                          <td className="px-3 py-3 text-center">
+                            {equipo.dif}
+                          </td>
+
+                          <td className="px-4 py-3 text-center font-bold text-[#2B2D31]">
+                            {equipo.pts}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
             )}
-          </section>
+
+            {tab === "jugadores" && (
+              <section className="rounded-2xl border border-[#E6E7EA] bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-[#E6E7EA] px-4 py-3">
+                  <div>
+                    <h2 className="text-base font-semibold text-[#2B2D31]">
+                      Estadísticas por jugador
+                    </h2>
+                    <p className="mt-0.5 text-xs text-[#6B6F76]">
+                      Eventos registrados durante los partidos.
+                    </p>
+                  </div>
+
+                  <span className="rounded-full bg-[#F8F2E2] px-3 py-1 text-xs font-semibold text-[#8C1D2C]">
+                    {estadisticasJugadores.length} jugadores
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[760px] border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-[#E6E7EA] bg-[#FAFAFA] text-left text-xs text-[#6B6F76]">
+                        <th className="px-4 py-3 font-semibold">Jugador</th>
+                        <th className="px-3 py-3 font-semibold">Equipo</th>
+                        <th className="px-3 py-3 font-semibold">Disciplina</th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          Goles
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          Puntos
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          Faltas
+                        </th>
+                        <th className="px-3 py-3 text-center font-semibold">
+                          Tarjetas
+                        </th>
+                        <th className="px-4 py-3 text-center font-semibold">
+                          Eventos
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {estadisticasJugadores.map((jugador) => (
+                        <tr
+                          key={jugador.id}
+                          className="border-b border-[#F0F0F1] last:border-b-0 hover:bg-[#FAFAFA]"
+                        >
+                          <td className="px-4 py-3">
+                            <p className="font-semibold text-[#2B2D31]">
+                              {jugador.numero ? `#${jugador.numero} ` : ""}
+                              {jugador.nombre}
+                            </p>
+                          </td>
+
+                          <td className="px-3 py-3 text-[#6B6F76]">
+                            {jugador.equipo}
+                          </td>
+
+                          <td className="px-3 py-3 text-[#6B6F76]">
+                            {jugador.disciplina}
+                          </td>
+
+                          <td className="px-3 py-3 text-center">
+                            {jugador.goles}
+                          </td>
+
+                          <td className="px-3 py-3 text-center">
+                            {jugador.puntos}
+                          </td>
+
+                          <td className="px-3 py-3 text-center">
+                            {jugador.faltas}
+                          </td>
+
+                          <td className="px-3 py-3 text-center">
+                            {jugador.tarjetas}
+                          </td>
+
+                          <td className="px-4 py-3 text-center font-bold text-[#2B2D31]">
+                            {jugador.eventos}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {tab === "resumen" && (
+              <section className="rounded-2xl border border-[#E6E7EA] bg-white shadow-sm">
+                <div className="border-b border-[#E6E7EA] px-4 py-3">
+                  <h2 className="text-base font-semibold text-[#2B2D31]">
+                    Resumen general
+                  </h2>
+                  <p className="mt-0.5 text-xs text-[#6B6F76]">
+                    Datos generales del torneo.
+                  </p>
+                </div>
+
+                <div className="divide-y divide-[#F0F0F1]">
+                  <div className="flex items-center justify-between px-4 py-4">
+                    <span className="text-sm text-[#6B6F76]">Partidos</span>
+                    <span className="text-lg font-bold text-[#2B2D31]">
+                      {resumen.partidos}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between px-4 py-4">
+                    <span className="text-sm text-[#6B6F76]">En curso</span>
+                    <span className="text-lg font-bold text-green-700">
+                      {resumen.enCurso}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between px-4 py-4">
+                    <span className="text-sm text-[#6B6F76]">Finalizados</span>
+                    <span className="text-lg font-bold text-[#2B2D31]">
+                      {resumen.finalizados}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between px-4 py-4">
+                    <span className="text-sm text-[#6B6F76]">Equipos</span>
+                    <span className="text-lg font-bold text-[#8C1D2C]">
+                      {resumen.equipos}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between px-4 py-4">
+                    <span className="text-sm text-[#6B6F76]">Jugadores</span>
+                    <span className="text-lg font-bold text-[#2B2D31]">
+                      {resumen.jugadores}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between px-4 py-4">
+                    <span className="text-sm text-[#6B6F76]">Eventos</span>
+                    <span className="text-lg font-bold text-[#CDAA43]">
+                      {resumen.eventos}
+                    </span>
+                  </div>
+                </div>
+              </section>
+            )}
+          </>
         )}
       </section>
     </main>

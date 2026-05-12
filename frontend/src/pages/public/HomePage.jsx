@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import PublicNavbar from "../../components/layout/PublicNavbar";
+import PublicNavbar from "../../components/layout/PublicNavBar";
 
 function HomePage() {
   const token = localStorage.getItem("scoretec_token");
@@ -14,237 +14,407 @@ function HomePage() {
 
   const panelTexto =
     user?.rol === "ADMIN"
-      ? "Ir al panel admin"
+      ? "Panel admin"
       : user?.rol === "ARBITRO"
-        ? "Ir al panel árbitro"
+        ? "Panel árbitro"
         : "Ir al panel";
 
   return (
     <main className="min-h-screen bg-[#F7F7F8] text-[#2B2D31]">
       <PublicNavbar />
 
-      <section className="mx-auto grid min-h-[calc(100vh-73px)] max-w-7xl items-center gap-8 px-4 py-8 sm:px-6 sm:py-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
-        <div className="order-2 lg:order-1">
-          <div className="mb-4 inline-flex rounded-full border border-[#E6E7EA] bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wide text-[#8C1D2C] shadow-sm">
-            Campus TecNM Nogales
-          </div>
+      <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <div className="mb-5 rounded-[2rem] border border-[#E6E7EA] bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#8C1D2C]">
+                ScoreTec · TecNM Campus Nogales
+              </p>
 
-          <h1 className="max-w-4xl text-4xl font-black leading-[1.05] tracking-tight text-[#2B2D31] sm:text-5xl lg:text-6xl">
-            Marcadores, partidos y estadísticas deportivas en tiempo real.
-          </h1>
+              <h1 className="mt-2 text-2xl font-bold leading-tight text-[#2B2D31] sm:text-3xl">
+                Información deportiva del campus
+              </h1>
 
-          <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#6B6F76] sm:text-lg sm:leading-8">
-            ScoreTec centraliza los torneos del campus para consultar partidos,
-            seguir resultados y facilitar el registro de eventos por parte de
-            árbitros o administradores.
-          </p>
-
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/matches"
-              className="rounded-2xl bg-[#8C1D2C] px-6 py-4 text-center text-sm font-black text-white shadow-sm transition hover:bg-[#741826]"
-            >
-              Ver partidos
-            </Link>
-
-            {!token ? (
-              <Link
-                to="/login"
-                className="rounded-2xl border border-[#8C1D2C] bg-white px-6 py-4 text-center text-sm font-black text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:text-white"
-              >
-                Iniciar sesión
-              </Link>
-            ) : (
-              <Link
-                to={panelLink}
-                className="rounded-2xl border border-[#8C1D2C] bg-white px-6 py-4 text-center text-sm font-black text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:text-white"
-              >
-                {panelTexto}
-              </Link>
-            )}
-          </div>
-
-          <div className="mt-8 grid grid-cols-3 gap-3 max-w-xl">
-            <div className="rounded-2xl border border-[#E6E7EA] bg-white p-4 shadow-sm">
-              <p className="text-2xl font-black text-[#2B2D31]">24/7</p>
-              <p className="mt-1 text-xs font-bold text-[#6B6F76]">
-                Consulta pública
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#6B6F76]">
+                Consulta partidos, marcadores, equipos y estadísticas de los
+                torneos deportivos en un solo lugar.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-[#E6E7EA] bg-white p-4 shadow-sm">
-              <p className="text-2xl font-black text-[#2B2D31]">Live</p>
-              <p className="mt-1 text-xs font-bold text-[#6B6F76]">
-                Marcadores
-              </p>
-            </div>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+              <Link
+                to="/matches"
+                className="rounded-2xl bg-[#8C1D2C] px-4 py-3 text-center text-sm font-semibold !text-white transition hover:bg-[#741826] hover:!text-white"
+              >
+                Ver partidos
+              </Link>
 
-            <div className="rounded-2xl border border-[#E6E7EA] bg-white p-4 shadow-sm">
-              <p className="text-2xl font-black text-[#2B2D31]">UX</p>
-              <p className="mt-1 text-xs font-bold text-[#6B6F76]">
-                Mobile first
-              </p>
+              {token ? (
+                <Link
+                  to={panelLink}
+                  className="rounded-2xl border border-[#8C1D2C] bg-white px-4 py-3 text-center text-sm font-semibold !text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:!text-white"
+                >
+                  {panelTexto}
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="rounded-2xl border border-[#8C1D2C] bg-white px-4 py-3 text-center text-sm font-semibold !text-[#8C1D2C] transition hover:bg-[#8C1D2C] hover:!text-white"
+                >
+                  Iniciar sesión
+                </Link>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="order-1 lg:order-2">
-          <div className="rounded-[2rem] border border-[#E6E7EA] bg-white p-4 shadow-sm sm:p-6">
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-wide text-[#8C1D2C]">
-                  Partido destacado
+        <div className="grid gap-5 lg:grid-cols-[1fr_390px]">
+          <section className="space-y-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <article className="rounded-3xl border border-[#E6E7EA] bg-white p-4 shadow-sm">
+                <p className="text-xs font-semibold uppercase text-[#6B6F76]">
+                  Partidos
                 </p>
+                <h2 className="mt-2 text-3xl font-bold text-[#2B2D31]">12</h2>
+                <p className="mt-1 text-xs text-[#6B6F76]">registrados</p>
+              </article>
 
-                <h2 className="mt-1 truncate text-xl font-black text-[#2B2D31]">
-                  Jornada deportiva
-                </h2>
-              </div>
+              <article className="rounded-3xl border border-[#E6E7EA] bg-white p-4 shadow-sm">
+                <p className="text-xs font-semibold uppercase text-[#6B6F76]">
+                  En vivo
+                </p>
+                <h2 className="mt-2 text-3xl font-bold text-green-700">2</h2>
+                <p className="mt-1 text-xs text-[#6B6F76]">activos</p>
+              </article>
 
-              <span className="shrink-0 rounded-full border border-green-100 bg-green-50 px-3 py-1 text-xs font-black text-green-700">
-                En vivo
-              </span>
+              <article className="rounded-3xl border border-[#E6E7EA] bg-white p-4 shadow-sm">
+                <p className="text-xs font-semibold uppercase text-[#6B6F76]">
+                  Equipos
+                </p>
+                <h2 className="mt-2 text-3xl font-bold text-[#2B2D31]">8</h2>
+                <p className="mt-1 text-xs text-[#6B6F76]">participantes</p>
+              </article>
+
+              <article className="rounded-3xl border border-[#E6E7EA] bg-white p-4 shadow-sm">
+                <p className="text-xs font-semibold uppercase text-[#6B6F76]">
+                  Deportes
+                </p>
+                <h2 className="mt-2 text-3xl font-bold text-[#8C1D2C]">4</h2>
+                <p className="mt-1 text-xs text-[#6B6F76]">disciplinas</p>
+              </article>
             </div>
 
-            <div className="rounded-3xl bg-[#FAFAFA] p-4 sm:p-6">
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                <div className="min-w-0 text-right">
-                  <h3 className="truncate text-sm font-black text-[#2B2D31] sm:text-base">
-                    Halcones Tec
-                  </h3>
-                  <p className="mt-1 text-xs font-bold text-[#6B6F76]">Local</p>
-                </div>
-
-                <div className="rounded-2xl bg-white px-4 py-3 text-center shadow-sm sm:px-6">
-                  <p className="text-3xl font-black leading-none text-[#2B2D31] sm:text-5xl">
-                    2<span className="mx-2 text-[#CDAA43]">-</span>1
+            <section className="rounded-[2rem] border border-[#E6E7EA] bg-white p-4 shadow-sm sm:p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-[#2B2D31]">
+                    Partido destacado
+                  </h2>
+                  <p className="mt-1 text-xs text-[#6B6F76]">
+                    Último resultado registrado
                   </p>
                 </div>
 
-                <div className="min-w-0">
-                  <h3 className="truncate text-sm font-black text-[#2B2D31] sm:text-base">
-                    Linces Tec
-                  </h3>
-                  <p className="mt-1 text-xs font-bold text-[#6B6F76]">
-                    Visitante
+                <span className="shrink-0 rounded-full border border-green-100 bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                  En vivo
+                </span>
+              </div>
+
+              <div className="rounded-3xl bg-[#FAFAFA] px-4 py-4">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                  <div className="min-w-0 text-center">
+                    <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-2xl border border-[#E6E7EA] bg-white text-xs font-semibold text-[#8C1D2C]">
+                      HT
+                    </div>
+
+                    <p className="truncate text-sm font-semibold text-[#2B2D31]">
+                      Halcones Tec
+                    </p>
+
+                    <p className="mt-0.5 text-[11px] text-[#6B6F76]">Local</p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white px-5 py-3 text-center shadow-sm">
+                    <p className="text-3xl font-bold leading-none text-[#2B2D31]">
+                      2<span className="mx-2 text-[#CDAA43]">-</span>1
+                    </p>
+                  </div>
+
+                  <div className="min-w-0 text-center">
+                    <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-2xl border border-[#E6E7EA] bg-white text-xs font-semibold text-[#CDAA43]">
+                      LT
+                    </div>
+
+                    <p className="truncate text-sm font-semibold text-[#2B2D31]">
+                      Linces Tec
+                    </p>
+
+                    <p className="mt-0.5 text-[11px] text-[#6B6F76]">
+                      Visitante
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <div className="rounded-2xl border border-[#E6E7EA] bg-white px-3 py-2.5">
+                  <p className="text-[11px] text-[#6B6F76]">Disciplina</p>
+                  <p className="mt-0.5 truncate text-sm font-semibold text-[#2B2D31]">
+                    Fútbol
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-[#E6E7EA] bg-white px-3 py-2.5">
+                  <p className="text-[11px] text-[#6B6F76]">Jornada</p>
+                  <p className="mt-0.5 truncate text-sm font-semibold text-[#2B2D31]">
+                    Actual
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-[#E6E7EA] bg-white px-3 py-2.5">
+                  <p className="text-[11px] text-[#6B6F76]">Sede</p>
+                  <p className="mt-0.5 truncate text-sm font-semibold text-[#2B2D31]">
+                    Cancha 1
                   </p>
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-[#E6E7EA] bg-white px-4 py-3">
-                <p className="text-xs font-bold text-[#6B6F76]">Disciplina</p>
-                <p className="mt-1 text-sm font-black text-[#2B2D31]">Fútbol</p>
-              </div>
-
-              <div className="rounded-2xl border border-[#E6E7EA] bg-white px-4 py-3">
-                <p className="text-xs font-bold text-[#6B6F76]">Estado</p>
-                <p className="mt-1 text-sm font-black text-[#2B2D31]">
-                  En curso
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-[#E6E7EA] bg-white px-4 py-3">
-                <p className="text-xs font-bold text-[#6B6F76]">Sede</p>
-                <p className="mt-1 truncate text-sm font-black text-[#2B2D31]">
-                  Cancha principal
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 rounded-3xl border border-[#E6E7EA] bg-[#FAFAFA] p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-black text-[#2B2D31]">
-                  Últimos eventos
-                </p>
+            <section className="rounded-[2rem] border border-[#E6E7EA] bg-white p-4 shadow-sm sm:p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-bold text-[#2B2D31]">
+                    Próximos partidos
+                  </h2>
+                  <p className="mt-1 text-xs text-[#6B6F76]">
+                    Encuentros programados
+                  </p>
+                </div>
 
                 <Link
                   to="/matches"
-                  className="text-xs font-black text-[#8C1D2C]"
+                  className="shrink-0 text-xs font-semibold text-[#8C1D2C]"
                 >
                   Ver todos
                 </Link>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3">
-                  <div>
-                    <p className="text-sm font-bold text-[#2B2D31]">
-                      Gol Halcones Tec
-                    </p>
-                    <p className="text-xs text-[#6B6F76]">Min. 42</p>
+                <Link
+                  to="/matches"
+                  className="flex items-center gap-3 rounded-2xl bg-[#FAFAFA] px-3 py-3 transition hover:bg-[#F3F3F4]"
+                >
+                  <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-white">
+                    <span className="text-[9px] font-semibold uppercase text-[#8C1D2C]">
+                      May
+                    </span>
+                    <span className="text-base font-bold leading-none text-[#2B2D31]">
+                      27
+                    </span>
                   </div>
 
-                  <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-black text-green-700">
-                    Gol
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[#2B2D31]">
+                      Basketball Varonil
+                    </p>
+
+                    <p className="mt-0.5 truncate text-xs text-[#6B6F76]">
+                      Halcones vs Linces · 16:00h
+                    </p>
+                  </div>
+
+                  <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
+                    Próximo
                   </span>
+                </Link>
+
+                <Link
+                  to="/matches"
+                  className="flex items-center gap-3 rounded-2xl bg-[#FAFAFA] px-3 py-3 transition hover:bg-[#F3F3F4]"
+                >
+                  <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-white">
+                    <span className="text-[9px] font-semibold uppercase text-[#8C1D2C]">
+                      May
+                    </span>
+                    <span className="text-base font-bold leading-none text-[#2B2D31]">
+                      28
+                    </span>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[#2B2D31]">
+                      Fútbol Soccer Femenil
+                    </p>
+
+                    <p className="mt-0.5 truncate text-xs text-[#6B6F76]">
+                      Nogales vs Águilas · 18:00h
+                    </p>
+                  </div>
+
+                  <span className="shrink-0 rounded-full bg-green-50 px-2.5 py-1 text-[10px] font-semibold text-green-700">
+                    En vivo
+                  </span>
+                </Link>
+
+                <Link
+                  to="/matches"
+                  className="flex items-center gap-3 rounded-2xl bg-[#FAFAFA] px-3 py-3 transition hover:bg-[#F3F3F4]"
+                >
+                  <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-white">
+                    <span className="text-[9px] font-semibold uppercase text-[#8C1D2C]">
+                      May
+                    </span>
+                    <span className="text-base font-bold leading-none text-[#2B2D31]">
+                      29
+                    </span>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-[#2B2D31]">
+                      Voleibol Mixto
+                    </p>
+
+                    <p className="mt-0.5 truncate text-xs text-[#6B6F76]">
+                      TecNM vs Invitados · 17:30h
+                    </p>
+                  </div>
+
+                  <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
+                    Próximo
+                  </span>
+                </Link>
+              </div>
+            </section>
+          </section>
+
+          <aside className="space-y-5">
+            <section className="rounded-[2rem] border border-[#E6E7EA] bg-white p-4 shadow-sm sm:p-5">
+              <h2 className="text-lg font-bold text-[#2B2D31]">
+                Información del torneo
+              </h2>
+
+              <div className="mt-4 space-y-3">
+                <div className="rounded-2xl bg-[#FAFAFA] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6B6F76]">
+                    Sede principal
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[#2B2D31]">
+                    TecNM Campus Nogales
+                  </p>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3">
-                  <div>
-                    <p className="text-sm font-bold text-[#2B2D31]">
-                      Falta Linces Tec
-                    </p>
-                    <p className="text-xs text-[#6B6F76]">Min. 38</p>
-                  </div>
+                <div className="rounded-2xl bg-[#FAFAFA] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6B6F76]">
+                    Disciplinas
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[#2B2D31]">
+                    Fútbol, básquetbol, voleibol y más
+                  </p>
+                </div>
 
-                  <span className="rounded-full bg-yellow-50 px-3 py-1 text-xs font-black text-yellow-700">
-                    Falta
-                  </span>
+                <div className="rounded-2xl bg-[#FAFAFA] px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6B6F76]">
+                    Consulta
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-[#2B2D31]">
+                    Resultados públicos en tiempo real
+                  </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
+            </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
-        <div className="grid gap-4 md:grid-cols-3">
-          <article className="rounded-3xl border border-[#E6E7EA] bg-white p-5 shadow-sm">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F8F2E2] text-lg font-black text-[#8C1D2C]">
-              1
-            </div>
+            <section className="rounded-[2rem] border border-[#E6E7EA] bg-white p-4 shadow-sm sm:p-5">
+              <h2 className="text-lg font-bold text-[#2B2D31]">
+                Accesos rápidos
+              </h2>
 
-            <h3 className="text-lg font-black text-[#2B2D31]">
-              Consulta pública
-            </h3>
+              <div className="mt-4 grid gap-2">
+                <Link
+                  to="/matches"
+                  className="flex items-center justify-between rounded-2xl bg-[#FAFAFA] px-4 py-3 text-sm font-semibold text-[#2B2D31] transition hover:bg-[#F3F3F4] hover:text-[#8C1D2C]"
+                >
+                  Ver calendario
+                  <span className="text-[#8C1D2C]">→</span>
+                </Link>
 
-            <p className="mt-2 text-sm leading-6 text-[#6B6F76]">
-              Estudiantes y visitantes pueden revisar partidos, resultados y
-              equipos sin entrar al panel administrativo.
-            </p>
-          </article>
+                <Link
+                  to="/teams"
+                  className="flex items-center justify-between rounded-2xl bg-[#FAFAFA] px-4 py-3 text-sm font-semibold text-[#2B2D31] transition hover:bg-[#F3F3F4] hover:text-[#8C1D2C]"
+                >
+                  Consultar equipos
+                  <span className="text-[#8C1D2C]">→</span>
+                </Link>
 
-          <article className="rounded-3xl border border-[#E6E7EA] bg-white p-5 shadow-sm">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F8F2E2] text-lg font-black text-[#8C1D2C]">
-              2
-            </div>
+                <Link
+                  to="/stats"
+                  className="flex items-center justify-between rounded-2xl bg-[#FAFAFA] px-4 py-3 text-sm font-semibold text-[#2B2D31] transition hover:bg-[#F3F3F4] hover:text-[#8C1D2C]"
+                >
+                  Ver estadísticas
+                  <span className="text-[#8C1D2C]">→</span>
+                </Link>
 
-            <h3 className="text-lg font-black text-[#2B2D31]">
-              Control de árbitro
-            </h3>
+                {!token && (
+                  <Link
+                    to="/login"
+                    className="flex items-center justify-between rounded-2xl bg-[#8C1D2C] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#741826]"
+                  >
+                    Iniciar sesión
+                    <span>→</span>
+                  </Link>
+                )}
+              </div>
+            </section>
 
-            <p className="mt-2 text-sm leading-6 text-[#6B6F76]">
-              El árbitro puede entrar desde celular y registrar goles, puntos,
-              faltas o eventos del partido de forma rápida.
-            </p>
-          </article>
+            <section className="rounded-[2rem] border border-[#E6E7EA] bg-white p-4 shadow-sm sm:p-5">
+              <h2 className="text-lg font-bold text-[#2B2D31]">
+                ¿Qué puedes consultar?
+              </h2>
 
-          <article className="rounded-3xl border border-[#E6E7EA] bg-white p-5 shadow-sm">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F8F2E2] text-lg font-black text-[#8C1D2C]">
-              3
-            </div>
+              <div className="mt-4 space-y-3">
+                <div className="flex gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#F8F2E2] text-sm font-semibold text-[#8C1D2C]">
+                    1
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#2B2D31]">
+                      Partidos
+                    </p>
+                    <p className="text-xs leading-5 text-[#6B6F76]">
+                      Fechas, horarios, sedes y marcadores.
+                    </p>
+                  </div>
+                </div>
 
-            <h3 className="text-lg font-black text-[#2B2D31]">
-              Administración
-            </h3>
+                <div className="flex gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#F8F2E2] text-sm font-semibold text-[#8C1D2C]">
+                    2
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#2B2D31]">
+                      Equipos
+                    </p>
+                    <p className="text-xs leading-5 text-[#6B6F76]">
+                      Participantes por disciplina.
+                    </p>
+                  </div>
+                </div>
 
-            <p className="mt-2 text-sm leading-6 text-[#6B6F76]">
-              Los administradores gestionan usuarios, equipos, jugadores,
-              disciplinas y partidos desde un panel más amplio.
-            </p>
-          </article>
+                <div className="flex gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#F8F2E2] text-sm font-semibold text-[#8C1D2C]">
+                    3
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#2B2D31]">
+                      Estadísticas
+                    </p>
+                    <p className="text-xs leading-5 text-[#6B6F76]">
+                      Resultados generales y desempeño del torneo.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </aside>
         </div>
       </section>
     </main>
