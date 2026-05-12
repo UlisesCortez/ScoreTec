@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import PublicNavbar from "../../components/layout/PublicNavbar";
+import PublicNavbar from "../../components/layout/PublicNavBar";
 
 import { getPlayersRequest } from "../../api/playersApi";
 import { getMatchesRequest } from "../../api/matchesApi";

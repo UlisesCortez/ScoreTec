@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import PublicNavbar from "../../components/layout/PublicNavbar";
+import PublicNavbar from "../../components/layout/PublicNavBar";
 
 import { getMatchesRequest } from "../../api/matchesApi";
 import { getTeamsRequest } from "../../api/teamsApi";
