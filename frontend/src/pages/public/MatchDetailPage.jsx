@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import PublicNavbar from "../../components/layout/PublicNavbar";
+import PublicNavbar from "../../components/layout/PublicNavBar";
 import { getMatchByIdRequest } from "../../api/matchesApi";
 import { getEventsByMatchRequest } from "../../api/eventsApi";
 
